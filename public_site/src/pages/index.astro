@@ -1,0 +1,68 @@
+---
+
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="/nexus.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Nexus - Homelab Dashboard</title>
+		<link rel="stylesheet" href="/src/styles/global.css">
+	</head>
+	<body class="bg-gray-50 text-gray-900 min-h-screen">
+		<div class="container mx-auto px-4 py-8 max-w-4xl">
+			<header class="text-center mb-12">
+				<img src="/nexus.png" alt="Nexus Logo" class="w-24 h-24 mx-auto mb-4">
+				<h1 class="text-4xl font-bold mb-4">Nexus</h1>
+				<p class="text-xl text-gray-600">A blazingly fast, modern homelab dashboard and service aggregator.</p>
+			</header>
+
+			<section id="features" class="mb-12">
+				<h2 class="text-3xl font-semibold mb-6 text-center">Features</h2>
+				<div class="grid md:grid-cols-2 gap-4">
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h3 class="font-semibold mb-2">⚡ Extremely Fast</h3>
+						<p>Built with Go backend and React frontend</p>
+					</div>
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h3 class="font-semibold mb-2">🔑 Passkey Support</h3>
+						<p>Secure authentication using WebAuthn</p>
+					</div>
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h3 class="font-semibold mb-2">🎨 Premium Design</h3>
+						<p>Using shadcn/ui and Tailwind CSS</p>
+					</div>
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h3 class="font-semibold mb-2">🛠️ Service Management</h3>
+						<p>Add and manage homelab services</p>
+					</div>
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h3 class="font-semibold mb-2">👥 User Workflow</h3>
+						<p>Administrator approval for registrations</p>
+					</div>
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h3 class="font-semibold mb-2">🐳 Docker Ready</h3>
+						<p>Fully containerized and ready for deployment</p>
+					</div>
+				</div>
+			</section>
+
+			<section id="quick-start" class="mb-12">
+				<h2 class="text-3xl font-semibold mb-6 text-center">Quick Start</h2>
+				<div class="bg-gray-100 p-6 rounded-lg">
+					<p class="mb-4">Ensure you have Docker and Docker Compose installed, then:</p>
+					<pre class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto"><code>docker-compose up -d</code></pre>
+					<p class="mt-4">Access at <code class="bg-gray-200 px-1 rounded">http://localhost:8080</code></p>
+				</div>
+			</section>
+
+			<section id="links" class="text-center">
+				<h2 class="text-3xl font-semibold mb-6">Links</h2>
+				<p class="mb-2"><a href="https://github.com/kieranholroyd/nexus" class="text-blue-600 hover:underline">GitHub Repository</a></p>
+				<p>License: MIT</p>
+			</section>
+		</div>
+	</body>
+</html>
