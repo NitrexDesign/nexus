@@ -40,7 +40,7 @@ export function ServiceCard({
   onDelete,
 }: ServiceCardProps) {
   return (
-    <Card className={cn(isSelected && "border-primary")}>
+    <Card className={"p-0" + cn(isSelected && " border-primary")}>
       <CardContent
         className={cn(
           "p-4",
@@ -48,7 +48,7 @@ export function ServiceCard({
         )}
       >
         {viewMode === "grid" && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="flex justify-between items-start">
               <div className="size-12 rounded border flex items-center justify-center relative overflow-hidden bg-muted group/logo">
                 {s.icon && (

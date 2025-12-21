@@ -119,7 +119,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
         ) : (
           <div className="space-y-16">
             {Object.entries(groupedServices).map(([group, groupServices]) => (
-              <section key={group} className="space-y-8">
+              <section key={group} className="space-y-2">
                 <div className="flex items-center gap-6">
                   <h2 className="text-2xl font-black tracking-tight">
                     {group}
@@ -128,7 +128,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                 </div>
                 <div
                   className={cn(
-                    "grid gap-6",
+                    "grid gap-2",
                     viewMode === "grid"
                       ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                       : "grid-cols-1",
@@ -144,21 +144,21 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                     >
                       <Card
                         className={cn(
-                          "h-full transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden",
+                          "h-full transition-all duration-300 p-0 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden",
                           viewMode === "list" &&
                             "hover:translate-x-1 hover:-translate-y-0",
                         )}
                       >
                         <CardContent
                           className={cn(
-                            "p-6 h-full",
+                            "p-5 h-auto flex flex-row gap-2 pb-0",
                             viewMode === "list" &&
-                              "flex items-center gap-6 p-4",
+                              " flex items-center gap-6",
                           )}
                         >
                           <div
                             className={cn(
-                              "rounded-2xl border bg-muted/30 flex items-center justify-center relative overflow-hidden transition-colors group-hover:bg-muted/50",
+                              "rounded-2xl border bg-muted/30 flex flex-row items-center justify-center relative overflow-hidden transition-colors group-hover:bg-muted/50",
                               viewMode === "grid" ? "size-16 mb-6" : "size-14",
                             )}
                           >
@@ -186,7 +186,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                             )}
                           </div>
 
-                          <div className="flex-1 min-w-0">
+                          <div className="min-h-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-bold text-lg truncate group-hover:text-primary transition-colors">
                                 {s.name}
