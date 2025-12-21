@@ -1,207 +1,346 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Loader2, Search, ChevronsUpDown, Check, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface Service {
-	id: string;
-	name: string;
-	url: string;
-	icon: string;
-	group: string;
-	order: number;
-	public: boolean;
-	auth_required: boolean;
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  group: string;
+  order: number;
+  public: boolean;
+  auth_required: boolean;
 }
 
 interface ServiceDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    editingId: string | "new" | null;
-    formData: Partial<Service>;
-    setFormData: (data: Partial<Service>) => void;
-    groups: string[];
-    onSave: (id?: string) => Promise<void>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  editingId: string | "new" | null;
+  formData: Partial<Service>;
+  setFormData: (data: Partial<Service>) => void;
+  groups: string[];
+  onSave: (id?: string) => Promise<void>;
 }
 
-export function ServiceDialog({ 
-    open, 
-    onOpenChange, 
-    editingId, 
-    formData, 
-    setFormData, 
-    groups, 
-    onSave 
+export function ServiceDialog({
+  open,
+  onOpenChange,
+  editingId,
+  formData,
+  setFormData,
+  groups,
+  onSave,
 }: ServiceDialogProps) {
-    const [groupPopoverOpen, setGroupPopoverOpen] = useState(false);
-    const [searchValue, setSearchValue] = useState("");
-    const [foundIcons, setFoundIcons] = useState<string[]>([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
+  const [groupPopoverOpen, setGroupPopoverOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [foundIcons, setFoundIcons] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-    const searchIcons = async () => {
-        if (!formData.url) return;
-        setIsSearching(true);
-        try {
-            const res = await fetch(`/api/icons/search?url=${encodeURIComponent(formData.url)}`);
-            const data = await res.json();
-            setFoundIcons(data || []);
-        } catch (err) {
-            toast.error("Failed to find icons");
-        } finally {
-            setIsSearching(false);
-        }
-    };
+  const searchIcons = async () => {
+    if (!formData.url) return;
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `/api/icons/search?url=${encodeURIComponent(formData.url)}`,
+      );
+      const data = await res.json();
+      setFoundIcons(data || []);
+    } catch (err) {
+      toast.error("Failed to find icons");
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
-    const handleSelectRemoteIcon = async (url: string) => {
-        setIsDownloading(true);
-        try {
-            const res = await fetch("/api/icons/download", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url }),
-            });
-            const data = await res.json();
-            setFormData({ ...formData, icon: data.path });
-            toast.success("Icon downloaded and set");
-        } catch (err) {
-            toast.error("Failed to download icon");
-        } finally {
-            setIsDownloading(false);
-        }
-    };
+  const handleSelectRemoteIcon = async (url: string) => {
+    setIsDownloading(true);
+    try {
+      const res = await fetch("/api/icons/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      setFormData({ ...formData, icon: data.path });
+      toast.success("Icon downloaded and set");
+    } catch (err) {
+      toast.error("Failed to download icon");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>{editingId === 'new' ? 'Add Service' : 'Edit Service'}</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-6 py-4">
-                    <div className="grid gap-2">
-                        <Label>Service Name</Label>
-                        <Input 
-                            value={formData.name || ''} 
-                            onChange={e => setFormData({...formData, name: e.target.value})} 
-                            placeholder="e.g. Plex, Home Assistant" 
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label>Service URL</Label>
-                        <div className="flex gap-2">
-                            <Input 
-                                value={formData.url || ''} 
-                                onChange={e => setFormData({...formData, url: e.target.value})} 
-                                placeholder="https://..." 
-                                className="flex-1" 
-                            />
-                            <Button variant="outline" size="icon" onClick={searchIcons} disabled={isSearching || !formData.url}>
-                                {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                            </Button>
-                        </div>
-                    </div>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>
+            {editingId === "new" ? "Add Service" : "Edit Service"}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-6 py-4">
+          <div className="grid gap-2">
+            <Label>Service Name</Label>
+            <Input
+              value={formData.name || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              placeholder="e.g. Plex, Home Assistant"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Service URL</Label>
+            <div className="flex gap-2">
+              <Input
+                value={formData.url || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, url: e.target.value })
+                }
+                placeholder="https://..."
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={searchIcons}
+                disabled={isSearching || !formData.url}
+              >
+                {isSearching ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
 
-                    {foundIcons.length > 0 && (
-                        <div className="grid grid-cols-5 gap-2 border p-3 rounded-lg bg-muted/30">
-                            {foundIcons.slice(0, 10).map((icon, i) => (
-                                <button
-                                    key={i}
-                                    className="aspect-square rounded-md border bg-background hover:border-primary flex items-center justify-center p-1.5 transition-all hover:scale-105"
-                                    onClick={() => handleSelectRemoteIcon(icon)}
-                                >
-                                    <img src={icon} alt={`Icon ${i}`} className="max-w-full max-h-full object-contain" />
-                                </button>
-                            ))}
-                        </div>
-                    )}
+          {foundIcons.length > 0 && (
+            <div className="grid grid-cols-5 gap-2 border p-3 rounded-lg bg-muted/30">
+              {foundIcons.slice(0, 10).map((icon, i) => (
+                <button
+                  key={i}
+                  className="aspect-square rounded-md border bg-background hover:border-primary flex items-center justify-center p-1.5 transition-all hover:scale-105"
+                  onClick={() => handleSelectRemoteIcon(icon)}
+                >
+                  <img
+                    src={icon}
+                    alt={`Icon ${i}`}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
 
-                    <div className="grid gap-2">
-                        <Label>Icon Path / URL</Label>
-                        <Input value={formData.icon || ''} onChange={e => setFormData({...formData, icon: e.target.value})} placeholder="/icons/..." />
-                    </div>
+          <div className="grid gap-2">
+            <Label>Icon Path / URL</Label>
+            <Input
+              value={formData.icon || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, icon: e.target.value })
+              }
+              placeholder="/icons/..."
+            />
+          </div>
 
-                    <div className="grid gap-2">
-                        <Label>Group / Category</Label>
-                        <Popover open={groupPopoverOpen} onOpenChange={setGroupPopoverOpen}>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="justify-between font-normal">
-                                    {formData.group || "Select group..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[300px] p-0">
-                                <Command>
-                                    <CommandInput placeholder="Search or create group..." value={searchValue} onValueChange={setSearchValue} />
-                                    <CommandList>
-                                        <CommandEmpty>
-                                            <Button variant="ghost" className="w-full justify-start text-xs" onClick={() => { setFormData({ ...formData, group: searchValue }); setGroupPopoverOpen(false); }}>
-                                                <Plus className="mr-2 h-3 w-3" /> Create "{searchValue}"
-                                            </Button>
-                                        </CommandEmpty>
-                                        <CommandGroup>
-                                            {groups.map((g) => (
-                                                <CommandItem key={g} value={g} onSelect={(val) => { setFormData({ ...formData, group: val }); setGroupPopoverOpen(false); }}>
-                                                    <Check className={cn("mr-2 h-4 w-4 text-primary", formData.group === g ? "opacity-100" : "opacity-0")} />
-                                                    {g}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-
-                    <div className="grid gap-3 pt-2">
-                        <Label>Visibility & Access</Label>
-                        <RadioGroup 
-                            value={formData.public ? (formData.auth_required ? "secured" : "public") : "private"}
-                            onValueChange={(val) => {
-                                if (val === "public") setFormData({...formData, public: true, auth_required: false});
-                                if (val === "secured") setFormData({...formData, public: true, auth_required: true});
-                                if (val === "private") setFormData({...formData, public: false, auth_required: true});
-                            }}
-                            className="flex flex-col space-y-2"
+          <div className="grid gap-2">
+            <Label>Group / Category</Label>
+            <Popover open={groupPopoverOpen} onOpenChange={setGroupPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="justify-between font-normal"
+                >
+                  {formData.group || "Select group..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Search or create group..."
+                    value={searchValue}
+                    onValueChange={setSearchValue}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-xs"
+                        onClick={() => {
+                          setFormData({ ...formData, group: searchValue });
+                          setGroupPopoverOpen(false);
+                        }}
+                      >
+                        <Plus className="mr-2 h-3 w-3" /> Create "{searchValue}"
+                      </Button>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {groups.map((g) => (
+                        <CommandItem
+                          key={g}
+                          value={g}
+                          onSelect={(val) => {
+                            setFormData({ ...formData, group: val });
+                            setGroupPopoverOpen(false);
+                          }}
                         >
-                            <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setFormData({...formData, public: true, auth_required: false})}>
-                                <RadioGroupItem value="public" id="public" className="mt-1" />
-                                <div className="space-y-1">
-                                    <Label htmlFor="public" className="font-bold cursor-pointer">Public</Label>
-                                    <p className="text-xs text-muted-foreground">Visible to everyone without login.</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setFormData({...formData, public: true, auth_required: true})}>
-                                <RadioGroupItem value="secured" id="secured" className="mt-1" />
-                                <div className="space-y-1">
-                                    <Label htmlFor="secured" className="font-bold cursor-pointer">Secured</Label>
-                                    <p className="text-xs text-muted-foreground">Visible to everyone, but requires Nexus login.</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setFormData({...formData, public: false, auth_required: true})}>
-                                <RadioGroupItem value="private" id="private" className="mt-1" />
-                                <div className="space-y-1">
-                                    <Label htmlFor="private" className="font-bold cursor-pointer">Private</Label>
-                                    <p className="text-xs text-muted-foreground">Only visible to administrators.</p>
-                                </div>
-                            </div>
-                        </RadioGroup>
-                    </div>
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4 text-primary",
+                              formData.group === g
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                          {g}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="grid gap-3 pt-2">
+            <Label>Visibility & Access</Label>
+            <RadioGroup
+              value={
+                formData.public
+                  ? formData.auth_required
+                    ? "secured"
+                    : "public"
+                  : "private"
+              }
+              onValueChange={(val) => {
+                if (val === "public")
+                  setFormData({
+                    ...formData,
+                    public: true,
+                    auth_required: false,
+                  });
+                if (val === "secured")
+                  setFormData({
+                    ...formData,
+                    public: true,
+                    auth_required: true,
+                  });
+                if (val === "private")
+                  setFormData({
+                    ...formData,
+                    public: false,
+                    auth_required: true,
+                  });
+              }}
+              className="flex flex-col space-y-2"
+            >
+              <div
+                className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    public: true,
+                    auth_required: false,
+                  })
+                }
+              >
+                <RadioGroupItem value="public" id="public" className="mt-1" />
+                <div className="space-y-1">
+                  <Label htmlFor="public" className="font-bold cursor-pointer">
+                    Public
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Visible to everyone without login.
+                  </p>
                 </div>
-                <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-                    <Button onClick={() => onSave(editingId === 'new' ? undefined : editingId ?? undefined)} disabled={isDownloading}>
-                        {isDownloading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {editingId === 'new' ? 'Create' : 'Save Changes'}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+              </div>
+              <div
+                className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    public: true,
+                    auth_required: true,
+                  })
+                }
+              >
+                <RadioGroupItem value="secured" id="secured" className="mt-1" />
+                <div className="space-y-1">
+                  <Label htmlFor="secured" className="font-bold cursor-pointer">
+                    Secured
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Visible to everyone, but requires Nexus login.
+                  </p>
+                </div>
+              </div>
+              <div
+                className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    public: false,
+                    auth_required: true,
+                  })
+                }
+              >
+                <RadioGroupItem value="private" id="private" className="mt-1" />
+                <div className="space-y-1">
+                  <Label htmlFor="private" className="font-bold cursor-pointer">
+                    Private
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Only visible to administrators.
+                  </p>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() =>
+              onSave(editingId === "new" ? undefined : (editingId ?? undefined))
+            }
+            disabled={isDownloading}
+          >
+            {isDownloading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {editingId === "new" ? "Create" : "Save Changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }

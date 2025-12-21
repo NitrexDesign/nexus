@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   return (
     <Tooltip>
@@ -28,5 +28,5 @@ export function ModeToggle() {
       </TooltipTrigger>
       <TooltipContent side="top">Toggle theme</TooltipContent>
     </Tooltip>
-  )
+  );
 }
