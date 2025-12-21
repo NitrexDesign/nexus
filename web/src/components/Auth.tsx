@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import * as api from "@/lib/api";
 import {
@@ -103,9 +103,9 @@ export function Auth({ onLogin }: AuthProps) {
               <CardTitle className="text-3xl font-black tracking-tight">Welcome</CardTitle>
               <CardDescription className="text-base">
                 Your secure portal to the digital ether.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -114,19 +114,19 @@ export function Auth({ onLogin }: AuthProps) {
                 <TabsList className="grid w-full grid-cols-2 rounded-xl p-1 bg-muted/50">
                   <TabsTrigger value="login" className="rounded-lg font-bold">Login</TabsTrigger>
                   <TabsTrigger value="register" className="rounded-lg font-bold">Register</TabsTrigger>
-                </TabsList>
+              </TabsList>
 
-                <div className="space-y-4">
-                  <div className="space-y-2">
+              <div className="space-y-4">
+                <div className="space-y-2">
                     <Label htmlFor="username" className="text-sm font-bold ml-1">Username</Label>
-                    <Input
-                      id="username"
+                  <Input
+                    id="username"
                       placeholder="e.g. kieran"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                       className="h-12 rounded-xl border-muted-foreground/20 focus-visible:ring-primary shadow-sm"
-                    />
-                  </div>
+                  />
+                </div>
 
                   <AnimatePresence mode="wait">
                     {activeTab === "login" ? (
@@ -137,17 +137,17 @@ export function Auth({ onLogin }: AuthProps) {
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <Button
+                  <Button
                           className="w-full h-12 rounded-xl text-base font-bold shadow-lg shadow-primary/20"
-                          onClick={handleLogin}
-                          disabled={loading}
-                        >
+                    onClick={handleLogin}
+                    disabled={loading}
+                  >
                           {loading ? (
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                           ) : (
                             "Authenticate with Passkey"
                           )}
-                        </Button>
+                  </Button>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -157,12 +157,12 @@ export function Auth({ onLogin }: AuthProps) {
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <Button
-                          variant="outline"
+                  <Button
+                    variant="outline"
                           className="w-full h-12 rounded-xl text-base font-bold border-2 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
-                          onClick={handleRegister}
-                          disabled={loading}
-                        >
+                    onClick={handleRegister}
+                    disabled={loading}
+                  >
                           {loading ? (
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                           ) : (
@@ -172,10 +172,10 @@ export function Auth({ onLogin }: AuthProps) {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
-              </Tabs>
-            </CardContent>
-          </Card>
+              </div>
+            </Tabs>
+          </CardContent>
+        </Card>
         </motion.div>
       </div>
     </div>
