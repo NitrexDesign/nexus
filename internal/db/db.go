@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 
+	"path/filepath"
+
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/nexus-homelab/nexus/internal/models"
 	_ "modernc.org/sqlite"
-	"path/filepath"
 )
 
 var DB *sql.DB
