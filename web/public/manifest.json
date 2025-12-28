@@ -17,6 +17,6 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "webauthn"],
   "host_permissions": ["<all_urls>"]
 }

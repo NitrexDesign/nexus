@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/nexus-homelab/nexus/internal/db"
@@ -27,14 +28,15 @@ func InitWebAuthn() error {
 	}
 	rpOrigin := os.Getenv("WEBAUTHN_RP_ORIGIN")
 	if rpOrigin == "" {
-		rpOrigin = "http://localhost:5173" // Vite dev port
+		rpOrigin = "http://localhost:5173,http://localhost:8080" // Default dev ports
 	}
+	origins := strings.Split(rpOrigin, ",")
 
 	var err error
 	WebAuthn, err = webauthn.New(&webauthn.Config{
 		RPDisplayName: rpName,
 		RPID:          rpID,
-		RPOrigins:     []string{rpOrigin},
+		RPOrigins:     origins,
 	})
 	return err
 }
