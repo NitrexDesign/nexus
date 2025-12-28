@@ -15,7 +15,7 @@ interface Service {
   url: string;
   description: string;
   icon: any;
-  status: "online" | "offline";
+  status: "online" | "offline";  new_tab: boolean;
 }
 
 const MOCK_SERVICES: Service[] = [
@@ -109,7 +109,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
           {filteredServices.map((service) => (
             <a
               href={service.url}
-              target="_blank"
+              target={service.new_tab ? "_blank" : "_self"}
               rel="noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
             >

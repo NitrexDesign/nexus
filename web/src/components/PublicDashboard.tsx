@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiFetch, resolveUrl } from "@/lib/api-client";
 
 interface Service {
   id: string;
@@ -20,7 +21,7 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
+  auth_required: boolean;  new_tab: boolean;
 }
 
 interface PublicDashboardProps {
@@ -50,7 +51,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
   );
 
   useEffect(() => {
-    fetch("/api/services")
+    apiFetch("/api/services")
       .then((res) => res.json())
       .then((data) => {
         const isLoggedIn = !!localStorage.getItem("nexus_user");
@@ -174,7 +175,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                         variants={item}
                         layout
                         href={s.url}
-                        target="_blank"
+                        target={s.new_tab ? "_blank" : "_self"}
                         rel="noopener noreferrer"
                         className="block group"
                       >
@@ -199,23 +200,23 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                                 viewMode === "grid" ? "size-16 mb-2" : "size-14",
                               )}
                             >
-                              {s.icon && (
-                                <div
-                                  className="absolute inset-0 opacity-10 blur-xl scale-150 transition-transform group-hover:scale-[2]"
-                                  style={{
-                                    backgroundImage: `url(${s.icon})`,
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                  }}
-                                />
-                              )}
-                              {s.icon ? (
-                                <img
-                                  src={s.icon}
-                                  alt={s.name}
-                                  className="relative z-10 max-w-[65%] max-h-[65%] object-contain drop-shadow-md transition-transform group-hover:scale-110"
-                                />
-                              ) : (
+                            {s.icon && (
+                              <div
+                                className="absolute inset-0 opacity-10 blur-xl scale-150 transition-transform group-hover:scale-[2]"
+                                style={{
+                                  backgroundImage: `url(${resolveUrl(s.icon)})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                }}
+                              />
+                            )}
+                            {s.icon ? (
+                              <img
+                                src={resolveUrl(s.icon)}
+                                alt={s.name}
+                                className="relative z-10 max-w-[65%] max-h-[65%] object-contain drop-shadow-md transition-transform group-hover:scale-110"
+                              />
+                            ) : (
                                 <Server
                                   size={viewMode === "grid" ? 32 : 24}
                                   className="relative z-10 text-muted-foreground"

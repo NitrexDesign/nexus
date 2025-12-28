@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, UserMinus, UserCheck, Trash2 } from "lucide-react";
+import { Loader2, Users, UserMinus, UserCheck, Trash2, Check, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api-client";
 
 interface User {
   id: string;
@@ -22,7 +23,7 @@ export function UserManagement({
   onRefresh,
 }: UserManagementProps) {
   const handleActionUser = async (id: string, approved: boolean) => {
-    const res = await fetch(`/api/users/${id}/approve`, {
+    const res = await apiFetch(`/api/users/${id}/approve`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ approved }),
@@ -38,7 +39,7 @@ export function UserManagement({
   const handleDeleteUser = async (id: string) => {
     if (!confirm("Delete this user? All their credentials will be removed."))
       return;
-    const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/users/${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("User deleted");
       onRefresh();
@@ -155,4 +156,3 @@ export function UserManagement({
   );
 }
 
-import { Check, Clock } from "lucide-react";

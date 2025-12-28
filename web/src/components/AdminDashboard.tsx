@@ -43,6 +43,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiFetch } from "@/lib/api-client";
 
 // External components
 import { ServiceCard } from "./admin/ServiceCard";
@@ -58,7 +59,7 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
+  auth_required: boolean;  new_tab: boolean;
 }
 
 interface User {
@@ -100,21 +101,21 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
   }, [showStats]);
 
   const fetchServices = () => {
-    fetch("/api/services")
+    apiFetch("/api/services")
       .then((res) => res.json())
       .then((data) => setServices(data || []))
       .finally(() => setLoading(false));
   };
 
   const fetchGroups = () => {
-    fetch("/api/groups")
+    apiFetch("/api/groups")
       .then((res) => res.json())
       .then((data) => setGroups(data || []));
   };
 
   const fetchUsers = () => {
     setUsersLoading(true);
-    fetch("/api/users")
+    apiFetch("/api/users")
       .then((res) => res.json())
       .then((data) => setUsers(data || []))
       .catch(() => toast.error("Failed to fetch users"))
@@ -130,7 +131,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
   const handleSave = async (id?: string) => {
     const method = id ? "PUT" : "POST";
     const url = id ? `/api/services/${id}` : "/api/services";
-    const res = await fetch(url, {
+    const res = await apiFetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -157,7 +158,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure? This action cannot be undone.")) return;
-    const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/services/${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Service deleted");
       setServices((prev) => prev.filter((s) => s.id !== id));
@@ -169,7 +170,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
     if (!confirm(`Delete ${selectedIds.size} services?`)) return;
 
     const promises = Array.from(selectedIds).map((id) =>
-      fetch(`/api/services/${id}`, { method: "DELETE" }),
+      apiFetch(`/api/services/${id}`, { method: "DELETE" }),
     );
 
     await Promise.all(promises);
@@ -206,7 +207,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
         const data = JSON.parse(ev.target?.result as string);
         if (!Array.isArray(data)) throw new Error("Invalid format");
 
-        const res = await fetch("/api/services/bulk", {
+        const res = await apiFetch("/api/services/bulk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),

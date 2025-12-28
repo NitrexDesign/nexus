@@ -16,7 +16,6 @@ import {
   startRegistration,
   startAuthentication,
 } from "@simplewebauthn/browser";
-import { ModeToggle } from "./ModeToggle";
 import { Server, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -86,18 +85,6 @@ export function Auth({ onLogin }: AuthProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-      <motion.header
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="px-4 md:px-8 flex justify-between items-center bg-background border-b h-14 z-10"
-      >
-        <div className="flex items-center gap-2">
-          <Server className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl tracking-tighter">Nexus</span>
-        </div>
-        <ModeToggle />
-      </motion.header>
-
       <div className="flex-1 flex items-center justify-center p-6 relative">
         <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -z-10" />
@@ -106,8 +93,9 @@ export function Auth({ onLogin }: AuthProps) {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", damping: 20, stiffness: 100 }}
+          className="w-full max-w-[480px]"
         >
-          <Card className="w-full max-w-[400px] shadow-2xl border-primary/10">
+          <Card className="w-full shadow-2xl border-primary/10">
             <CardHeader className="text-center">
               <div className="mx-auto bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
                 <Server className="text-primary h-6 w-6" />
@@ -205,4 +193,3 @@ export function Auth({ onLogin }: AuthProps) {
     </div>
   );
 }
-

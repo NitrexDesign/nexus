@@ -11,6 +11,7 @@ import {
 import { Server, Edit2, MoreVertical, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { resolveUrl } from "@/lib/api-client";
 
 interface Service {
   id: string;
@@ -20,7 +21,7 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
+  auth_required: boolean;  new_tab: boolean;
 }
 
 interface ServiceCardProps {
@@ -64,7 +65,7 @@ export function ServiceCard({
                     <div
                       className="absolute inset-0 opacity-20 blur-md scale-150 transition-transform group-hover/logo:scale-[2]"
                       style={{
-                        backgroundImage: `url(${s.icon})`,
+                        backgroundImage: `url(${resolveUrl(s.icon)})`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                       }}
@@ -72,7 +73,7 @@ export function ServiceCard({
                   )}
                   {s.icon ? (
                     <img
-                      src={s.icon}
+                      src={resolveUrl(s.icon)}
                       alt={s.name}
                       className="relative z-10 max-w-[70%] max-h-[70%] object-contain drop-shadow-sm"
                     />
@@ -113,7 +114,7 @@ export function ServiceCard({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="rounded-xl">
                     <DropdownMenuItem
-                      onClick={() => window.open(s.url, "_blank")}
+                      onClick={() => window.open(s.url, s.new_tab ? "_blank" : "_self")}
                       className="cursor-pointer"
                     >
                       Launch Service
@@ -138,7 +139,7 @@ export function ServiceCard({
                   <div
                     className="absolute inset-0 opacity-20 blur-md scale-150 transition-transform group-hover/logo:scale-[2]"
                     style={{
-                      backgroundImage: `url(${s.icon})`,
+                      backgroundImage: `url(${resolveUrl(s.icon)})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
@@ -146,7 +147,7 @@ export function ServiceCard({
                 )}
                 {s.icon ? (
                   <img
-                    src={s.icon}
+                    src={resolveUrl(s.icon)}
                     alt={s.name}
                     className="relative z-10 max-w-[70%] max-h-[70%] object-contain drop-shadow-sm"
                   />

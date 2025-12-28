@@ -75,7 +75,8 @@ func createTables() error {
 			"group" TEXT,
 			"order" INTEGER DEFAULT 0,
 			public BOOLEAN DEFAULT FALSE,
-			auth_required BOOLEAN DEFAULT FALSE
+			auth_required BOOLEAN DEFAULT FALSE,
+			new_tab BOOLEAN DEFAULT TRUE
 		);`,
 	}
 
@@ -88,6 +89,7 @@ func createTables() error {
 	// Simple migration for existing DB
 	DB.Exec("ALTER TABLE services ADD COLUMN public BOOLEAN DEFAULT FALSE;")
 	DB.Exec("ALTER TABLE services ADD COLUMN auth_required BOOLEAN DEFAULT FALSE;")
+	DB.Exec("ALTER TABLE services ADD COLUMN new_tab BOOLEAN DEFAULT TRUE;")
 	DB.Exec("ALTER TABLE users ADD COLUMN approved BOOLEAN DEFAULT FALSE;")
 	DB.Exec("ALTER TABLE users ADD COLUMN password_hash TEXT;")
 	DB.Exec("UPDATE users SET approved = TRUE WHERE (SELECT COUNT(*) FROM users) = 1;") // Keep existing user approved if migration
@@ -182,7 +184,7 @@ func SaveCredential(userID string, cred *webauthn.Credential) error {
 }
 
 func GetServices() ([]models.Service, error) {
-	rows, err := DB.Query(`SELECT id, name, url, icon, "group", "order", public, auth_required FROM services ORDER BY "order" ASC`)
+	rows, err := DB.Query(`SELECT id, name, url, icon, "group", "order", public, auth_required, new_tab FROM services ORDER BY "order" ASC`)
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +193,7 @@ func GetServices() ([]models.Service, error) {
 	var services []models.Service
 	for rows.Next() {
 		var s models.Service
-		if err := rows.Scan(&s.ID, &s.Name, &s.URL, &s.Icon, &s.Group, &s.Order, &s.Public, &s.AuthRequired); err == nil {
+		if err := rows.Scan(&s.ID, &s.Name, &s.URL, &s.Icon, &s.Group, &s.Order, &s.Public, &s.AuthRequired, &s.NewTab); err == nil {
 			services = append(services, s)
 		}
 	}
@@ -199,14 +201,14 @@ func GetServices() ([]models.Service, error) {
 }
 
 func CreateService(s *models.Service) error {
-	_, err := DB.Exec(`INSERT INTO services (id, name, url, icon, "group", "order", public, auth_required) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired)
+	_, err := DB.Exec(`INSERT INTO services (id, name, url, icon, "group", "order", public, auth_required, new_tab) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab)
 	return err
 }
 
 func UpdateService(s *models.Service) error {
-	_, err := DB.Exec(`UPDATE services SET name=?, url=?, icon=?, "group"=?, "order"=?, public=?, auth_required=? WHERE id=?`,
-		s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.ID)
+	_, err := DB.Exec(`UPDATE services SET name=?, url=?, icon=?, "group"=?, "order"=?, public=?, auth_required=?, new_tab=? WHERE id=?`,
+		s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.ID)
 	return err
 }
 
@@ -247,8 +249,8 @@ func BulkCreateServices(services []models.Service) error {
 		if s.ID == "" {
 			s.ID = models.NewID()
 		}
-		_, err := tx.Exec(`INSERT INTO services (id, name, url, icon, "group", "order", public, auth_required) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-			s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired)
+		_, err := tx.Exec(`INSERT INTO services (id, name, url, icon, "group", "order", public, auth_required, new_tab) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab)
 		if err != nil {
 			return err
 		}
