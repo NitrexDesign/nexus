@@ -11,10 +11,12 @@
   "action": {
     "default_title": "Nexus"
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
   "permissions": ["storage"],
   "host_permissions": ["<all_urls>"]
 }
-

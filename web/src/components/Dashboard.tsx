@@ -14,8 +14,9 @@ interface Service {
   name: string;
   url: string;
   description: string;
-  icon: any;
-  status: "online" | "offline";  new_tab: boolean;
+  icon: React.ComponentType<{ size?: number }>;
+  status: "online" | "offline";
+  new_tab: boolean;
 }
 
 const MOCK_SERVICES: Service[] = [
@@ -26,6 +27,7 @@ const MOCK_SERVICES: Service[] = [
     description: "Media Server",
     icon: Server,
     status: "online",
+    new_tab: true,
   },
   {
     id: "2",
@@ -34,6 +36,7 @@ const MOCK_SERVICES: Service[] = [
     description: "Smart Home",
     icon: Settings,
     status: "online",
+    new_tab: true,
   },
   {
     id: "3",
@@ -42,6 +45,7 @@ const MOCK_SERVICES: Service[] = [
     description: "Network Ad-blocker",
     icon: Server,
     status: "online",
+    new_tab: true,
   },
   {
     id: "4",
@@ -50,11 +54,14 @@ const MOCK_SERVICES: Service[] = [
     description: "File Storage",
     icon: ExternalLink,
     status: "offline",
+    new_tab: true,
   },
 ];
 
 interface DashboardProps {
-  user: any;
+  user: {
+    username: string;
+  };
   onLogout: () => void;
 }
 

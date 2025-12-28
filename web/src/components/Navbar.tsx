@@ -26,7 +26,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
-  user?: any;
+  user?: {
+    username: string;
+    display_name?: string;
+  } | null;
   onLogout?: () => void;
   search?: string;
   onSearchChange?: (val: string) => void;

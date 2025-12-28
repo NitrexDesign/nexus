@@ -1,5 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, lazy, Suspense } from "react";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { FloatingNav } from "@/components/FloatingNav";
@@ -17,18 +17,20 @@ const PageLoader = () => (
   </div>
 );
 
+interface User {
+  username: string;
+  display_name?: string;
+  id?: string;
+}
+
 function App() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem("nexus_user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("nexus_user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
-  const handleLogin = (u: any) => {
+  const handleLogin = (u: User) => {
     setUser(u);
     localStorage.setItem("nexus_user", JSON.stringify(u));
   };
@@ -40,7 +42,7 @@ function App() {
 
   return (
     <TooltipProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Navbar
           user={user}
           onLogout={handleLogout}
@@ -70,7 +72,7 @@ function App() {
         </Suspense>
         <FloatingNav />
         <Toaster position="top-right" />
-      </BrowserRouter>
+      </HashRouter>
     </TooltipProvider>
   );
 }

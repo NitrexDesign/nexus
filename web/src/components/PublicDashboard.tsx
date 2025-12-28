@@ -21,7 +21,8 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;  new_tab: boolean;
+  auth_required: boolean;
+  new_tab: boolean;
 }
 
 interface PublicDashboardProps {

@@ -20,7 +20,7 @@ import { Server, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AuthProps {
-  onLogin: (user: any) => void;
+  onLogin: (user: { username: string }) => void;
 }
 
 export function Auth({ onLogin }: AuthProps) {
@@ -47,8 +47,8 @@ export function Auth({ onLogin }: AuthProps) {
         await api.finishRegistration(username, attestationResponse);
         toast.success("Identity profile initialized! You can now authenticate.");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to initialize account");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to initialize account");
     } finally {
       setLoading(false);
     }
@@ -74,9 +74,9 @@ export function Auth({ onLogin }: AuthProps) {
         toast.success("Access granted. Welcome back.");
         onLogin({ username });
       }
-    } catch (err: any) {
+    } catch (err) {
       toast.error(
-        err.message || "Authentication verification failed",
+        err instanceof Error ? err.message : "Authentication verification failed",
       );
     } finally {
       setLoading(false);
