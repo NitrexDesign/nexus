@@ -4,39 +4,40 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-
-	"path/filepath"
+	"time"
 
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/nexus-homelab/nexus/internal/models"
-	_ "modernc.org/sqlite"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var DB *sql.DB
 
-func InitDB(path string) error {
-	absPath, _ := filepath.Abs(path)
-	log.Printf("Connecting to database at: %s", absPath)
+func InitDB(dsn string) error {
+	log.Printf("Connecting to MySQL database...")
 
 	var err error
-	DB, err = sql.Open("sqlite", path)
-	if err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
+	// Retry connection as MySQL might take a moment to start in docker
+	for i := 0; i < 10; i++ {
+		DB, err = sql.Open("mysql", dsn)
+		if err == nil {
+			err = DB.Ping()
+		}
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to database (attempt %d/10): %v", i+1, err)
+		time.Sleep(2 * time.Second)
 	}
 
-	// Set pragmas for better reliability
-	_, err = DB.Exec(`
-		PRAGMA journal_mode = WAL;
-		PRAGMA busy_timeout = 5000;
-		PRAGMA synchronous = NORMAL;
-	`)
 	if err != nil {
-		log.Printf("Warning: failed to set pragmas: %v", err)
+		return fmt.Errorf("failed to connect to database after retries: %w", err)
 	}
 
-	if err := DB.Ping(); err != nil {
-		return fmt.Errorf("failed to ping database: %w", err)
-	}
+	// Set connection pool settings
+	DB.SetMaxOpenConns(25)
+	DB.SetMaxIdleConns(25)
+	DB.SetConnMaxLifetime(5 * time.Minute)
 
 	if err := createTables(); err != nil {
 		return fmt.Errorf("failed to create tables: %w", err)
@@ -49,31 +50,31 @@ func InitDB(path string) error {
 func createTables() error {
 	queries := []string{
 		`CREATE TABLE IF NOT EXISTS users (
-			id TEXT PRIMARY KEY,
-			username TEXT UNIQUE NOT NULL,
-			display_name TEXT,
+			id VARCHAR(255) PRIMARY KEY,
+			username VARCHAR(255) UNIQUE NOT NULL,
+			display_name VARCHAR(255),
 			approved BOOLEAN DEFAULT FALSE,
-			password_hash TEXT
+			password_hash VARCHAR(255)
 		);`,
 		`CREATE TABLE IF NOT EXISTS credentials (
-			id BLOB PRIMARY KEY,
-			user_id TEXT NOT NULL,
+			id VARBINARY(255) PRIMARY KEY,
+			user_id VARCHAR(255) NOT NULL,
 			public_key BLOB NOT NULL,
-			attestation_type TEXT NOT NULL,
-			aaguid BLOB NOT NULL,
-			sign_count INTEGER NOT NULL,
+			attestation_type VARCHAR(255) NOT NULL,
+			aaguid VARBINARY(255) NOT NULL,
+			sign_count BIGINT NOT NULL,
 			clone_warning BOOLEAN NOT NULL,
 			backup_eligible BOOLEAN NOT NULL DEFAULT FALSE,
 			backup_state BOOLEAN NOT NULL DEFAULT FALSE,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS services (
-			id TEXT PRIMARY KEY,
-			name TEXT NOT NULL,
-			url TEXT NOT NULL,
-			icon TEXT,
-			"group" TEXT,
-			"order" INTEGER DEFAULT 0,
+			id VARCHAR(255) PRIMARY KEY,
+			name VARCHAR(255) NOT NULL,
+			url VARCHAR(255) NOT NULL,
+			icon VARCHAR(255),
+			` + "`group`" + ` VARCHAR(255),
+			` + "`order`" + ` INTEGER DEFAULT 0,
 			public BOOLEAN DEFAULT FALSE,
 			auth_required BOOLEAN DEFAULT FALSE,
 			new_tab BOOLEAN DEFAULT TRUE
@@ -85,16 +86,6 @@ func createTables() error {
 			return err
 		}
 	}
-
-	// Simple migration for existing DB
-	DB.Exec("ALTER TABLE services ADD COLUMN public BOOLEAN DEFAULT FALSE;")
-	DB.Exec("ALTER TABLE services ADD COLUMN auth_required BOOLEAN DEFAULT FALSE;")
-	DB.Exec("ALTER TABLE services ADD COLUMN new_tab BOOLEAN DEFAULT TRUE;")
-	DB.Exec("ALTER TABLE users ADD COLUMN approved BOOLEAN DEFAULT FALSE;")
-	DB.Exec("ALTER TABLE users ADD COLUMN password_hash TEXT;")
-	DB.Exec("UPDATE users SET approved = TRUE WHERE (SELECT COUNT(*) FROM users) = 1;") // Keep existing user approved if migration
-	DB.Exec("ALTER TABLE credentials ADD COLUMN backup_eligible BOOLEAN DEFAULT FALSE;")
-	DB.Exec("ALTER TABLE credentials ADD COLUMN backup_state BOOLEAN DEFAULT FALSE;")
 
 	return nil
 }
@@ -184,7 +175,7 @@ func SaveCredential(userID string, cred *webauthn.Credential) error {
 }
 
 func GetServices() ([]models.Service, error) {
-	rows, err := DB.Query(`SELECT id, name, url, icon, "group", "order", public, auth_required, new_tab FROM services ORDER BY "order" ASC`)
+	rows, err := DB.Query("SELECT id, name, url, icon, `group`, `order`, public, auth_required, new_tab FROM services ORDER BY `order` ASC")
 	if err != nil {
 		return nil, err
 	}
@@ -201,13 +192,13 @@ func GetServices() ([]models.Service, error) {
 }
 
 func CreateService(s *models.Service) error {
-	_, err := DB.Exec(`INSERT INTO services (id, name, url, icon, "group", "order", public, auth_required, new_tab) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	_, err := DB.Exec("INSERT INTO services (id, name, url, icon, `group`, `order`, public, auth_required, new_tab) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab)
 	return err
 }
 
 func UpdateService(s *models.Service) error {
-	_, err := DB.Exec(`UPDATE services SET name=?, url=?, icon=?, "group"=?, "order"=?, public=?, auth_required=?, new_tab=? WHERE id=?`,
+	_, err := DB.Exec("UPDATE services SET name=?, url=?, icon=?, `group`=?, `order`=?, public=?, auth_required=?, new_tab=? WHERE id=?",
 		s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.ID)
 	return err
 }
@@ -218,7 +209,7 @@ func DeleteService(id string) error {
 }
 
 func GetGroups() ([]string, error) {
-	rows, err := DB.Query(`SELECT DISTINCT "group" FROM services WHERE "group" IS NOT NULL AND "group" != '' ORDER BY "group" ASC`)
+	rows, err := DB.Query("SELECT DISTINCT `group` FROM services WHERE `group` IS NOT NULL AND `group` != '' ORDER BY `group` ASC")
 	if err != nil {
 		return nil, err
 	}
@@ -233,6 +224,7 @@ func GetGroups() ([]string, error) {
 	}
 	return groups, nil
 }
+
 func BulkCreateServices(services []models.Service) error {
 	tx, err := DB.Begin()
 	if err != nil {
@@ -249,7 +241,7 @@ func BulkCreateServices(services []models.Service) error {
 		if s.ID == "" {
 			s.ID = models.NewID()
 		}
-		_, err := tx.Exec(`INSERT INTO services (id, name, url, icon, "group", "order", public, auth_required, new_tab) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		_, err := tx.Exec("INSERT INTO services (id, name, url, icon, `group`, `order`, public, auth_required, new_tab) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab)
 		if err != nil {
 			return err

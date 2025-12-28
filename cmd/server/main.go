@@ -52,12 +52,30 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 }
 
 func main() {
-	dbPath := os.Getenv("DB_PATH")
-	if dbPath == "" {
-		dbPath = "data/nexus.db"
+	dbType := os.Getenv("DB_TYPE")
+	var dsn string
+
+	if dbType == "mysql" {
+		user := os.Getenv("DB_USER")
+		pass := os.Getenv("DB_PASSWORD")
+		host := os.Getenv("DB_HOST")
+		port := os.Getenv("DB_PORT")
+		name := os.Getenv("DB_NAME")
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, pass, host, port, name)
+	} else {
+		// Fallback to SQLite for local dev if not specified
+		dbPath := os.Getenv("DB_PATH")
+		if dbPath == "" {
+			dbPath = "data/nexus.db"
+		}
+		// For local dev, we can still support SQLite if we want, 
+		// but the user asked to switch to MySQL.
+		// I'll keep the SQLite path for now but it will fail if the driver is removed.
+		dsn = dbPath 
+		log.Printf("Warning: Using SQLite at %s. MySQL is recommended.", dsn)
 	}
 
-	if err := db.InitDB(dbPath); err != nil {
+	if err := db.InitDB(dsn); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 

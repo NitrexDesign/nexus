@@ -24,8 +24,7 @@ func RegisterServiceHandlers(r chi.Router) {
 }
 
 func listServices(w http.ResponseWriter, r *http.Request) {
-    // Check if user is authenticated for private services
-    // For now, return all services marked as public if not auth, all if auth
+	// Return all services from the database
 	services, err := db.GetServices()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

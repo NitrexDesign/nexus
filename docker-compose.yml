@@ -1,4 +1,20 @@
 services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "8767:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=nexus_root_password
+      - MYSQL_DATABASE=nexus
+      - MYSQL_USER=nexus_user
+      - MYSQL_PASSWORD=nexus_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
   nexus:
     image: ghcr.io/nitrexdesign/nexus:sha-6f23ebb
     ports:
@@ -7,10 +23,19 @@ services:
       - nexus-data:/app/data
     environment:
       - PORT=8080
-      - DB_PATH=/app/data/nexus.db
+      - DB_TYPE=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=nexus
+      - DB_USER=nexus_user
+      - DB_PASSWORD=nexus_password
       - WEBAUTHN_RP_NAME=Nexus
       - WEBAUTHN_RP_ID=start.holroydnet.uk
       - WEBAUTHN_RP_ORIGIN=https://start.holroydnet.uk
+    depends_on:
+      mysql:
+        condition: service_healthy
 
 volumes:
   nexus-data:
+  mysql-data:
