@@ -3,6 +3,7 @@ package health
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/nexus-homelab/nexus/internal/db"
