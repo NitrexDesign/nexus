@@ -36,9 +36,26 @@ func InitDB(driver, dsn string) error {
 	}
 
 	// Set connection pool settings
-	DB.SetMaxOpenConns(25)
+	if driver == "sqlite" {
+		DB.SetMaxOpenConns(1)
+	} else {
+		DB.SetMaxOpenConns(25)
+	}
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxLifetime(5 * time.Minute)
+
+	if driver == "sqlite" {
+		// Enable WAL mode for better concurrency in SQLite
+		_, err = DB.Exec("PRAGMA journal_mode=WAL;")
+		if err != nil {
+			log.Printf("Warning: Failed to enable WAL mode: %v", err)
+		}
+		// Set busy timeout
+		_, err = DB.Exec("PRAGMA busy_timeout=5000;")
+		if err != nil {
+			log.Printf("Warning: Failed to set busy_timeout: %v", err)
+		}
+	}
 
 	if err := createTables(driver); err != nil {
 		return fmt.Errorf("failed to create tables: %w", err)

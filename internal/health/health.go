@@ -8,8 +8,21 @@ import (
 	"github.com/nexus-homelab/nexus/internal/db"
 )
 
+type healthJob struct {
+	ID  string
+	URL string
+}
+
+var jobChan = make(chan healthJob, 100)
+
 func StartHealthChecker(interval time.Duration) {
 	log.Printf("Starting health checker with interval %v", interval)
+	
+	// Start worker pool
+	for i := 0; i < 5; i++ {
+		go healthWorker()
+	}
+
 	ticker := time.NewTicker(interval)
 	go func() {
 		// Run once immediately
@@ -20,6 +33,12 @@ func StartHealthChecker(interval time.Duration) {
 	}()
 }
 
+func healthWorker() {
+	for job := range jobChan {
+		processCheck(job.ID, job.URL)
+	}
+}
+
 func checkAllServices() {
 	services, err := db.GetServices()
 	if err != nil {
@@ -28,11 +47,11 @@ func checkAllServices() {
 	}
 
 	for _, s := range services {
-		go checkService(s.ID, s.URL)
+		jobChan <- healthJob{ID: s.ID, URL: s.URL}
 	}
 }
 
-func checkService(id string, url string) {
+func processCheck(id string, url string) {
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
