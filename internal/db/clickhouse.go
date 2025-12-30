@@ -29,25 +29,38 @@ func InitClickHouse() error {
 	}
 
 	addr := fmt.Sprintf("%s:%s", host, port)
-	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{addr},
-		Auth: clickhouse.Auth{
-			Database: "default", // Connect to default first to create database
-			Username: "default",
-			Password: "",
-		},
-		Settings: clickhouse.Settings{
-			"max_execution_time": 60,
-		},
-		DialTimeout: 5 * time.Second,
-	})
+	var conn driver.Conn
+	var err error
 
-	if err != nil {
-		return fmt.Errorf("failed to open clickhouse: %w", err)
+	// Retry connection as ClickHouse might take a moment to start
+	for i := 0; i < 10; i++ {
+		conn, err = clickhouse.Open(&clickhouse.Options{
+			Addr: []string{addr},
+			Auth: clickhouse.Auth{
+				Database: "default",
+				Username: "default",
+				Password: "",
+			},
+			Settings: clickhouse.Settings{
+				"max_execution_time": 60,
+			},
+			DialTimeout: 5 * time.Second,
+		})
+
+		if err == nil {
+			err = conn.Ping(context.Background())
+		}
+
+		if err == nil {
+			break
+		}
+
+		log.Printf("Failed to connect to ClickHouse (attempt %d/10): %v", i+1, err)
+		time.Sleep(2 * time.Second)
 	}
 
-	if err := conn.Ping(context.Background()); err != nil {
-		return fmt.Errorf("failed to ping clickhouse: %w", err)
+	if err != nil {
+		return fmt.Errorf("failed to connect to clickhouse after retries: %w", err)
 	}
 
 	// Create database if not exists

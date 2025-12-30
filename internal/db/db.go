@@ -82,7 +82,7 @@ func createTables(driver string) error {
 				auth_required BOOLEAN DEFAULT FALSE,
 				new_tab BOOLEAN DEFAULT TRUE,
 				health_status VARCHAR(50) DEFAULT 'unknown',
-				last_checked TIMESTAMP
+				last_checked TIMESTAMP NULL DEFAULT NULL
 			);`,
 		}
 	} else {
@@ -118,7 +118,7 @@ func createTables(driver string) error {
 				auth_required BOOLEAN DEFAULT FALSE,
 				new_tab BOOLEAN DEFAULT TRUE,
 				health_status TEXT DEFAULT 'unknown',
-				last_checked DATETIME
+				last_checked DATETIME NULL DEFAULT NULL
 			);`,
 		}
 	}
@@ -132,10 +132,10 @@ func createTables(driver string) error {
 	// Migrations for existing tables
 	if driver == "mysql" {
 		DB.Exec("ALTER TABLE services ADD COLUMN health_status VARCHAR(50) DEFAULT 'unknown'")
-		DB.Exec("ALTER TABLE services ADD COLUMN last_checked TIMESTAMP")
+		DB.Exec("ALTER TABLE services ADD COLUMN last_checked TIMESTAMP NULL DEFAULT NULL")
 	} else {
 		DB.Exec("ALTER TABLE services ADD COLUMN health_status TEXT DEFAULT 'unknown'")
-		DB.Exec("ALTER TABLE services ADD COLUMN last_checked DATETIME")
+		DB.Exec("ALTER TABLE services ADD COLUMN last_checked DATETIME NULL DEFAULT NULL")
 	}
 
 	return nil
@@ -249,18 +249,18 @@ func GetServices() ([]models.Service, error) {
 
 func CreateService(s *models.Service) error {
 	_, err := DB.Exec("INSERT INTO services (id, name, url, icon, `group`, `order`, public, auth_required, new_tab, health_status, last_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.HealthStatus, s.LastChecked)
+		s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.HealthStatus, toNullTime(s.LastChecked))
 	return err
 }
 
 func UpdateService(s *models.Service) error {
 	_, err := DB.Exec("UPDATE services SET name=?, url=?, icon=?, `group`=?, `order`=?, public=?, auth_required=?, new_tab=?, health_status=?, last_checked=? WHERE id=?",
-		s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.HealthStatus, s.LastChecked, s.ID)
+		s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.HealthStatus, toNullTime(s.LastChecked), s.ID)
 	return err
 }
 
 func UpdateServiceHealth(id string, status string, lastChecked time.Time) error {
-	_, err := DB.Exec("UPDATE services SET health_status=?, last_checked=? WHERE id=?", status, lastChecked, id)
+	_, err := DB.Exec("UPDATE services SET health_status=?, last_checked=? WHERE id=?", status, toNullTime(lastChecked), id)
 	return err
 }
 
@@ -303,11 +303,18 @@ func BulkCreateServices(services []models.Service) error {
 			s.ID = models.NewID()
 		}
 		_, err := tx.Exec("INSERT INTO services (id, name, url, icon, `group`, `order`, public, auth_required, new_tab, health_status, last_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.HealthStatus, s.LastChecked)
+			s.ID, s.Name, s.URL, s.Icon, s.Group, s.Order, s.Public, s.AuthRequired, s.NewTab, s.HealthStatus, toNullTime(s.LastChecked))
 		if err != nil {
 			return err
 		}
 	}
 
 	return tx.Commit()
+}
+
+func toNullTime(t time.Time) sql.NullTime {
+	return sql.NullTime{
+		Time:  t,
+		Valid: !t.IsZero(),
+	}
 }

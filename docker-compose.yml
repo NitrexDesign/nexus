@@ -29,13 +29,13 @@ services:
     volumes:
       - clickhouse-data:/var/lib/clickhouse
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   nexus:
-    image: ghcr.io/kieranholroyd/nexus:master
+    build: .
     ports:
       - "8080:8080"
     volumes:
@@ -58,7 +58,7 @@ services:
       mysql:
         condition: service_healthy
       clickhouse:
-        condition: service_healthy
+        condition: service_started
 
 volumes:
   nexus-data:
