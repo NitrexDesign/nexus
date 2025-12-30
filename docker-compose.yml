@@ -35,7 +35,7 @@ services:
       retries: 10
 
   nexus:
-    build: .
+    image: ghcr.io/kieranholroyd/nexus:master
     ports:
       - "8080:8080"
     volumes:
