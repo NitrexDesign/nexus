@@ -22,7 +22,7 @@ func InitClickHouse() error {
 	}
 	port := os.Getenv("CLICKHOUSE_PORT")
 	if port == "" {
-		port = "9000"
+		port = "8123" // Standard Web/HTTP port
 	}
 	database := os.Getenv("CLICKHOUSE_DB")
 	if database == "" {
@@ -43,6 +43,7 @@ func InitClickHouse() error {
 	for i := 0; i < 10; i++ {
 		conn, err = clickhouse.Open(&clickhouse.Options{
 			Addr: []string{addr},
+			Protocol: clickhouse.HTTP, // Use Web (HTTP) driver
 			Auth: clickhouse.Auth{
 				Database: database,
 				Username: user,
