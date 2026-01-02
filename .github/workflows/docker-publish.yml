@@ -2,9 +2,9 @@ name: Docker
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   REGISTRY: ghcr.io
@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Lowercase IMAGE_NAME
+        run: echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -43,7 +46,7 @@ jobs:
         uses: useblacksmith/build-push-action@v2
         with:
           context: .
-          dockerfile: Dockerfile.server
+          file: Dockerfile.server
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:master
@@ -54,7 +57,7 @@ jobs:
         uses: useblacksmith/build-push-action@v2
         with:
           context: .
-          dockerfile: Dockerfile.web
+          file: Dockerfile.web
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:master

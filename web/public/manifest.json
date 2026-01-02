@@ -20,3 +20,4 @@
   "permissions": ["storage", "webauthn"],
   "host_permissions": ["<all_urls>"]
 }
+
