@@ -42,3 +42,6 @@ data/icons/*
 *.sln
 *.sw?
 .env
+out/
+extension/
+.next/

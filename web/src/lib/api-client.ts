@@ -1,17 +1,13 @@
 const getBaseUrl = () => {
-  // If we're in a chrome extension environment (chrome-extension://)
-  // we need a full URL. Otherwise, relative paths are fine.
-  const isExtension = window.location.protocol === "chrome-extension:";
-  if (isExtension) {
-    return localStorage.getItem("nexus_server_url") || "http://localhost:8080";
-  }
+  const savedUrl = localStorage.getItem("nexus_server_url");
+  if (savedUrl) return savedUrl;
   return "";
 };
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const baseUrl = getBaseUrl();
   const url = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`;
-  
+
   const res = await fetch(url, options);
   return res;
 }
@@ -22,4 +18,3 @@ export function resolveUrl(path: string) {
   const baseUrl = getBaseUrl();
   return `${baseUrl}${path}`;
 }
-

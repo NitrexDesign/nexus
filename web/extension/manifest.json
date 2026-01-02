@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus Dashboard",
+  "version": "1.0.0",
+  "description": "Your homelab command center.",
+  "icons": {
+    "16": "nexus.png",
+    "48": "nexus.png",
+    "128": "nexus.png"
+  },
+  "action": {
+    "default_title": "Nexus"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "storage",
+    "webauthn"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
