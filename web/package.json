@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && npm run build:extension",
+    "postbuild": "mv .next/standalone/Github/nexus/web/server.js .next/standalone/ 2>/dev/null || true",
     "build:extension": "node scripts/build-extension.js",
     "start": "next start",
     "lint": "next lint"

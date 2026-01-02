@@ -8,7 +8,13 @@
   "headers": [],
   "rewrites": {
     "beforeFiles": [],
-    "afterFiles": [],
+    "afterFiles": [
+      {
+        "source": "/api/:path*",
+        "destination": "http://127.0.0.1:8081/api/:path*",
+        "regex": "^/api(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
+      }
+    ],
     "fallback": []
   },
   "dynamicRoutes": [],

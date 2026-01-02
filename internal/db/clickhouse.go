@@ -14,26 +14,24 @@ import (
 
 var CH driver.Conn
 
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
 func InitClickHouse() error {
 	host := os.Getenv("CLICKHOUSE_HOST")
 	if host == "" {
 		log.Println("Skipping ClickHouse initialization: CLICKHOUSE_HOST not set")
 		return nil
 	}
-	port := os.Getenv("CLICKHOUSE_PORT")
-	if port == "" {
-		port = "8123" // Standard Web/HTTP port
-	}
-	database := os.Getenv("CLICKHOUSE_DB")
-	if database == "" {
-		database = "nexus"
-	}
-
-	user := os.Getenv("CLICKHOUSE_USER")
-	if user == "" {
-		user = "default"
-	}
-	pass := os.Getenv("CLICKHOUSE_PASSWORD")
+	port := getEnv("CLICKHOUSE_PORT", "8123")
+	database := getEnv("CLICKHOUSE_DB", "nexus")
+	user := getEnv("CLICKHOUSE_USER", "default")
+	pass := getEnv("CLICKHOUSE_PASSWORD", "")
 
 	addr := fmt.Sprintf("%s:%s", host, port)
 	var conn driver.Conn
@@ -42,7 +40,7 @@ func InitClickHouse() error {
 	// Retry connection as ClickHouse might take a moment to start
 	for i := 0; i < 10; i++ {
 		conn, err = clickhouse.Open(&clickhouse.Options{
-			Addr: []string{addr},
+			Addr:     []string{addr},
 			Protocol: clickhouse.HTTP, // Use Web (HTTP) driver
 			Auth: clickhouse.Auth{
 				Database: "default",
@@ -80,7 +78,7 @@ func InitClickHouse() error {
 	// Reconnect to the specific database
 	conn.Close()
 	CH, err = clickhouse.Open(&clickhouse.Options{
-		Addr: []string{addr},
+		Addr:     []string{addr},
 		Protocol: clickhouse.HTTP,
 		Auth: clickhouse.Auth{
 			Database: database,

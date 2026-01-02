@@ -55,16 +55,24 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	})
 }
 
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Warning: No .env file found or error loading it: %v", err)
 	}
 
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
+	dbUser := getEnv("DB_USER", "nexus")
+	dbPass := getEnv("DB_PASSWORD", "nexus_password")
+	dbHost := getEnv("DB_HOST", "mysql")
+	dbPort := getEnv("DB_PORT", "3306")
+	dbName := getEnv("DB_NAME", "nexus")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPass, dbHost, dbPort, dbName)
 
 	if err := db.InitDB(dsn); err != nil {
@@ -114,10 +122,7 @@ func main() {
 	filesDir := http.Dir(path.Join(workDir, "web/dist"))
 	FileServer(r, "/", filesDir)
 
-	port := os.Getenv("API_PORT")
-	if port == "" {
-		port = "8081"
-	}
+	port := getEnv("API_PORT", "8081")
 
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
