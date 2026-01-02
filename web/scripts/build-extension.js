@@ -56,29 +56,20 @@ function processHtmlFiles(dir) {
       let content = fs.readFileSync(fullPath, "utf8");
 
       const cspMeta =
-        "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' *; font-src 'self' data:;\">";
+        "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' *; font-src 'self' data:;\">";
       content = content.replace("<head>", `<head>\n  ${cspMeta}`);
 
       content = content.replace(/\/_next\//g, "/next/");
 
       const scriptPattern = /<script[^>]*>([\s\S]*?)<\/script>/gi;
-      const scripts = [];
-      let scriptIndex = 0;
 
       content = content.replace(scriptPattern, (fullScript, scriptContent) => {
         const trimmed = scriptContent.trim();
         if (trimmed && !trimmed.startsWith("<!")) {
-          const scriptName = `inline-${scriptIndex++}.js`;
-          scripts.push({ name: scriptName, content: trimmed });
-          return `<script src="${scriptName}"></script>`;
+          return `<script>${trimmed}</script>`;
         }
         return "";
       });
-
-      const scriptDir = path.dirname(fullPath);
-      for (const script of scripts) {
-        fs.writeFileSync(path.join(scriptDir, script.name), script.content);
-      }
 
       fs.writeFileSync(fullPath, content);
     }
