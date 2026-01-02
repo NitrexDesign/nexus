@@ -1,8 +1,13 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const SOURCE_DIR = path.join(__dirname, "..", "out");
 const EXTENSION_DIR = path.join(__dirname, "..", "extension");
+const DOCKER_DIR = path.join(__dirname, "..", "..", "web", "dist");
 
 function cleanDir(dir) {
   if (fs.existsSync(dir)) {
@@ -36,7 +41,12 @@ function copyDir(src, dest) {
       if (
         !entry.name.startsWith("_") &&
         entry.name !== ".DS_Store" &&
-        entry.name !== "index.txt"
+        entry.name !== "index.txt" &&
+        entry.name !== "__next._full.txt" &&
+        entry.name !== "__next._head.txt" &&
+        entry.name !== "__next._index.txt" &&
+        entry.name !== "__next.__PAGE__.txt" &&
+        entry.name !== "__next._tree.txt"
       ) {
         fs.copyFileSync(srcPath, destPath);
       }
@@ -98,4 +108,17 @@ function buildExtension() {
   console.log(`Files: ${files.join(", ")}`);
 }
 
+function prepareDocker() {
+  console.log("Preparing Docker web directory...");
+
+  cleanDir(DOCKER_DIR);
+
+  copyDir(SOURCE_DIR, DOCKER_DIR);
+
+  processHtmlFiles(DOCKER_DIR);
+
+  console.log(`Docker web directory prepared at: ${DOCKER_DIR}`);
+}
+
 buildExtension();
+prepareDocker();

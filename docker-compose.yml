@@ -39,8 +39,8 @@ services:
       - nexus-network
 
   nexus:
-    image: ghcr.io/kieranholroyd/nexus:master
-    # build: .
+    # image: ghcr.io/kieranholroyd/nexus:master
+    build: .
     ports:
       - "8080:8080"
     volumes:
