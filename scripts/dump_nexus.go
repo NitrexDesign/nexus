@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-	_ "modernc.org/sqlite"
 )
 
 // Service matches the structure for importing
@@ -29,26 +28,20 @@ type Service struct {
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage:")
-		fmt.Println("  go run scripts/dump_nexus.go <url_or_db_path_or_dsn>")
+		fmt.Println("  go run scripts/dump_nexus.go <url_or_dsn>")
 		fmt.Println("\nExamples:")
 		fmt.Println("  go run scripts/dump_nexus.go http://localhost:8080")
-		fmt.Println("  go run scripts/dump_nexus.go data/nexus.db")
-		fmt.Println("  go run scripts/dump_nexus.go \"user:pass@tcp(localhost:8767)/nexus\"")
+		fmt.Println("  go run scripts/dump_nexus.go \"user:pass@tcp(localhost:3306)/nexus\"")
 		os.Exit(1)
 	}
 
 	target := os.Args[1]
 	var services []Service
 
-	if strings.HasPrefix(target, "http://") || strings.HasPrefix(target, "https://") || (strings.Contains(target, ":") && !strings.Contains(target, "/") && !strings.Contains(target, "@")) {
-		if !strings.HasPrefix(target, "http") {
-			target = "http://" + target
-		}
+	if strings.HasPrefix(target, "http://") || strings.HasPrefix(target, "https://") {
 		services = fetchFromAPI(target)
-	} else if strings.Contains(target, "@tcp(") {
-		services = readFromDB("mysql", target)
 	} else {
-		services = readFromDB("sqlite", target)
+		services = readFromMySQL(target)
 	}
 
 	output, err := json.MarshalIndent(services, "", "  ")
@@ -98,15 +91,14 @@ func fetchFromAPI(baseURL string) []Service {
 	return filtered
 }
 
-func readFromDB(driver, dsn string) []Service {
-	fmt.Fprintf(os.Stderr, "Reading services from %s database...\n", driver)
-	db, err := sql.Open(driver, dsn)
+func readFromMySQL(dsn string) []Service {
+	fmt.Fprintf(os.Stderr, "Reading services from MySQL database...\n")
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}
 	defer db.Close()
 
-	// Use backticks for MySQL compatibility, SQLite also supports them
 	rows, err := db.Query("SELECT name, url, icon, `group`, `order`, public, auth_required, new_tab FROM services ORDER BY `order` ASC")
 	if err != nil {
 		log.Fatalf("Failed to query services: %v", err)

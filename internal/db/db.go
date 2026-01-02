@@ -9,11 +9,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/nexus-homelab/nexus/internal/models"
-	_ "modernc.org/sqlite"
 )
 
 var DB *sql.DB
-var dbDriver string
 
 type dbTask struct {
 	fn   func() error
@@ -22,14 +20,10 @@ type dbTask struct {
 
 var taskQueue = make(chan dbTask, 500)
 
-func startWorker(driver string) {
+func startWorker() {
 	for task := range taskQueue {
 		err := task.fn()
 		task.done <- err
-		if driver == "sqlite" {
-			// Add a small delay between writes to allow SQLite to breathe/sync
-			time.Sleep(50 * time.Millisecond)
-		}
 	}
 }
 
@@ -39,14 +33,12 @@ func runTask(fn func() error) error {
 	return <-done
 }
 
-func InitDB(driver, dsn string) error {
-	log.Printf("Connecting to %s database...", driver)
+func InitDB(dsn string) error {
+	log.Println("Connecting to MySQL database...")
 
-	dbDriver = driver
 	var err error
-	// Retry connection as database might take a moment to start
 	for i := 0; i < 10; i++ {
-		DB, err = sql.Open(driver, dsn)
+		DB, err = sql.Open("mysql", dsn)
 		if err == nil {
 			err = DB.Ping()
 		}
@@ -58,36 +50,18 @@ func InitDB(driver, dsn string) error {
 	}
 
 	if err == nil {
-		go startWorker(driver)
+		go startWorker()
 	}
 
 	if err != nil {
 		return fmt.Errorf("failed to connect to database after retries: %w", err)
 	}
 
-	// Set connection pool settings
-	if driver == "sqlite" {
-		DB.SetMaxOpenConns(1)
-	} else {
-		DB.SetMaxOpenConns(25)
-	}
+	DB.SetMaxOpenConns(25)
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
-	if driver == "sqlite" {
-		// Enable WAL mode for better concurrency in SQLite
-		_, err = DB.Exec("PRAGMA journal_mode=WAL;")
-		if err != nil {
-			log.Printf("Warning: Failed to enable WAL mode: %v", err)
-		}
-		// Set busy timeout
-		_, err = DB.Exec("PRAGMA busy_timeout=5000;")
-		if err != nil {
-			log.Printf("Warning: Failed to set busy_timeout: %v", err)
-		}
-	}
-
-	if err := createTables(driver); err != nil {
+	if err := createTables(); err != nil {
 		return fmt.Errorf("failed to create tables: %w", err)
 	}
 
@@ -95,98 +69,47 @@ func InitDB(driver, dsn string) error {
 	return nil
 }
 
-func createTables(driver string) error {
-	var queries []string
-	if driver == "mysql" {
-		queries = []string{
-			`CREATE TABLE IF NOT EXISTS users (
-				id VARCHAR(255) PRIMARY KEY,
-				username VARCHAR(255) UNIQUE NOT NULL,
-				display_name VARCHAR(255),
-				approved BOOLEAN DEFAULT FALSE,
-				password_hash VARCHAR(255)
-			);`,
-			`CREATE TABLE IF NOT EXISTS credentials (
-				id VARBINARY(255) PRIMARY KEY,
-				user_id VARCHAR(255) NOT NULL,
-				public_key BLOB NOT NULL,
-				attestation_type VARCHAR(255) NOT NULL,
-				aaguid VARBINARY(255) NOT NULL,
-				sign_count BIGINT NOT NULL,
-				clone_warning BOOLEAN NOT NULL,
-				backup_eligible BOOLEAN NOT NULL DEFAULT FALSE,
-				backup_state BOOLEAN NOT NULL DEFAULT FALSE,
-				FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-			);`,
-			`CREATE TABLE IF NOT EXISTS services (
-				id VARCHAR(255) PRIMARY KEY,
-				name VARCHAR(255) NOT NULL,
-				url VARCHAR(255) NOT NULL,
-				icon VARCHAR(255),
-				` + "`group`" + ` VARCHAR(255),
-				` + "`order`" + ` INTEGER DEFAULT 0,
-				public BOOLEAN DEFAULT FALSE,
-				auth_required BOOLEAN DEFAULT FALSE,
-				new_tab BOOLEAN DEFAULT TRUE,
-				check_health BOOLEAN DEFAULT TRUE,
-				health_status VARCHAR(50) DEFAULT 'unknown',
-				last_checked TIMESTAMP NULL DEFAULT NULL
-			);`,
-		}
-	} else {
-		// SQLite
-		queries = []string{
-			`CREATE TABLE IF NOT EXISTS users (
-				id TEXT PRIMARY KEY,
-				username TEXT UNIQUE NOT NULL,
-				display_name TEXT,
-				approved BOOLEAN DEFAULT FALSE,
-				password_hash TEXT
-			);`,
-			`CREATE TABLE IF NOT EXISTS credentials (
-				id BLOB PRIMARY KEY,
-				user_id TEXT NOT NULL,
-				public_key BLOB NOT NULL,
-				attestation_type TEXT NOT NULL,
-				aaguid BLOB NOT NULL,
-				sign_count INTEGER NOT NULL,
-				clone_warning BOOLEAN NOT NULL,
-				backup_eligible BOOLEAN NOT NULL DEFAULT FALSE,
-				backup_state BOOLEAN NOT NULL DEFAULT FALSE,
-				FOREIGN KEY (user_id) REFERENCES users(id)
-			);`,
-			`CREATE TABLE IF NOT EXISTS services (
-				id TEXT PRIMARY KEY,
-				name TEXT NOT NULL,
-				url TEXT NOT NULL,
-				icon TEXT,
-				"group" TEXT,
-				"order" INTEGER DEFAULT 0,
-				public BOOLEAN DEFAULT FALSE,
-				auth_required BOOLEAN DEFAULT FALSE,
-				new_tab BOOLEAN DEFAULT TRUE,
-				check_health BOOLEAN DEFAULT TRUE,
-				health_status TEXT DEFAULT 'unknown',
-				last_checked DATETIME NULL DEFAULT NULL
-			);`,
-		}
+func createTables() error {
+	queries := []string{
+		`CREATE TABLE IF NOT EXISTS users (
+			id VARCHAR(255) PRIMARY KEY,
+			username VARCHAR(255) UNIQUE NOT NULL,
+			display_name VARCHAR(255),
+			approved BOOLEAN DEFAULT FALSE,
+			password_hash VARCHAR(255)
+		);`,
+		`CREATE TABLE IF NOT EXISTS credentials (
+			id VARBINARY(255) PRIMARY KEY,
+			user_id VARCHAR(255) NOT NULL,
+			public_key BLOB NOT NULL,
+			attestation_type VARCHAR(255) NOT NULL,
+			aaguid VARBINARY(255) NOT NULL,
+			sign_count BIGINT NOT NULL,
+			clone_warning BOOLEAN NOT NULL,
+			backup_eligible BOOLEAN NOT NULL DEFAULT FALSE,
+			backup_state BOOLEAN NOT NULL DEFAULT FALSE,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		);`,
+		`CREATE TABLE IF NOT EXISTS services (
+			id VARCHAR(255) PRIMARY KEY,
+			name VARCHAR(255) NOT NULL,
+			url VARCHAR(255) NOT NULL,
+			icon VARCHAR(255),
+			` + "`group`" + ` VARCHAR(255),
+			` + "`order`" + ` INTEGER DEFAULT 0,
+			public BOOLEAN DEFAULT FALSE,
+			auth_required BOOLEAN DEFAULT FALSE,
+			new_tab BOOLEAN DEFAULT TRUE,
+			check_health BOOLEAN DEFAULT TRUE,
+			health_status VARCHAR(50) DEFAULT 'unknown',
+			last_checked TIMESTAMP NULL DEFAULT NULL
+		);`,
 	}
 
 	for _, q := range queries {
 		if _, err := DB.Exec(q); err != nil {
 			return err
 		}
-	}
-
-	// Migrations for existing tables
-	if driver == "mysql" {
-		DB.Exec("ALTER TABLE services ADD COLUMN health_status VARCHAR(50) DEFAULT 'unknown'")
-		DB.Exec("ALTER TABLE services ADD COLUMN last_checked TIMESTAMP NULL DEFAULT NULL")
-		DB.Exec("ALTER TABLE services ADD COLUMN check_health BOOLEAN DEFAULT TRUE")
-	} else {
-		DB.Exec("ALTER TABLE services ADD COLUMN health_status TEXT DEFAULT 'unknown'")
-		DB.Exec("ALTER TABLE services ADD COLUMN last_checked DATETIME NULL DEFAULT NULL")
-		DB.Exec("ALTER TABLE services ADD COLUMN check_health BOOLEAN DEFAULT TRUE")
 	}
 
 	return nil

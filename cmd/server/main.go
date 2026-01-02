@@ -60,29 +60,14 @@ func main() {
 		log.Printf("Warning: No .env file found or error loading it: %v", err)
 	}
 
-	dbType := os.Getenv("DB_TYPE")
-	var dsn string
-	var driver string
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPass, dbHost, dbPort, dbName)
 
-	if dbType == "mysql" {
-		driver = "mysql"
-		user := os.Getenv("DB_USER")
-		pass := os.Getenv("DB_PASSWORD")
-		host := os.Getenv("DB_HOST")
-		port := os.Getenv("DB_PORT")
-		name := os.Getenv("DB_NAME")
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, pass, host, port, name)
-	} else {
-		driver = "sqlite"
-		dbPath := os.Getenv("DB_PATH")
-		if dbPath == "" {
-			dbPath = "data/nexus.db"
-		}
-		dsn = dbPath
-		log.Printf("Warning: Using SQLite at %s. MySQL is recommended.", dsn)
-	}
-
-	if err := db.InitDB(driver, dsn); err != nil {
+	if err := db.InitDB(dsn); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
