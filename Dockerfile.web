@@ -1,0 +1,28 @@
+FROM node:20-slim AS builder
+WORKDIR /app
+ARG BUILD_DATE
+ENV BUILD_DATE=${BUILD_DATE:-unknown}
+RUN corepack enable && corepack prepare pnpm@latest --activate
+COPY web/package*.json ./
+RUN pnpm install
+COPY web/ ./
+RUN pnpm build
+
+FROM node:20-slim
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1000 nodejs && adduser -u 1000 -G nodejs -s /bin/sh -D nextjs
+
+COPY --from=builder --chown=1000:1000 /app/.next/standalone ./
+COPY --from=builder --chown=1000:1000 /app/public ./public
+COPY --from=builder --chown=1000:1000 /app/.next/static ./static
+
+USER nextjs
+
+ENV PORT=3000
+ENV API_URL=http://server:8081
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]

@@ -50,6 +50,15 @@ type Service struct {
 	LastChecked  time.Time `json:"last_checked"`
 }
 
+func NewService() Service {
+	return Service{
+		HealthStatus: "unknown",
+		LastChecked:  time.Time{},
+		Order:        999,
+		Group:        "General",
+	}
+}
+
 type HealthPoint struct {
 	Timestamp time.Time `json:"timestamp"`
 	UpCount   uint64    `json:"up_count"`

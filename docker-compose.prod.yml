@@ -39,9 +39,7 @@ services:
       - nexus-network
 
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
+    image: ghcr.io/kieranholroyd/nexus-server:latest
     ports:
       - "8080:8080"
     volumes:
@@ -72,9 +70,7 @@ services:
       - nexus-network
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
+    image: ghcr.io/kieranholroyd/nexus-web:latest
     ports:
       - "3000:3000"
     environment:

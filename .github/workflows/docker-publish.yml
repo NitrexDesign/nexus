@@ -12,7 +12,6 @@ env:
 
 jobs:
   build:
-    # runs-on: warp-ubuntu-latest-x64-2x
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: read
@@ -40,10 +39,20 @@ jobs:
             type=ref,event=branch
             type=sha,format=short
 
-      - name: Build and push Docker image
+      - name: Build and push server image
         uses: useblacksmith/build-push-action@v2
         with:
           context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          dockerfile: Dockerfile.server
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push web image
+        uses: useblacksmith/build-push-action@v2
+        with:
+          context: .
+          dockerfile: Dockerfile.web
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
