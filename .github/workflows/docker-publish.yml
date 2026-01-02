@@ -45,7 +45,9 @@ jobs:
           context: .
           dockerfile: Dockerfile.server
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:master
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push web image
@@ -54,5 +56,7 @@ jobs:
           context: .
           dockerfile: Dockerfile.web
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:master
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}

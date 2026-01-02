@@ -6,17 +6,17 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY web/package*.json ./
 RUN pnpm install
 COPY web/ ./
-RUN pnpm build
+RUN pnpm next build
 
 FROM node:20-slim
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup -g 1000 nodejs && adduser -u 1000 -G nodejs -s /bin/sh -D nextjs
+RUN addgroup --gid 1001 nodejs && adduser --uid 1001 --gid 1001 --shell /bin/sh --disabled-login --disabled-password nextjs
 
-COPY --from=builder --chown=1000:1000 /app/.next/standalone ./
-COPY --from=builder --chown=1000:1000 /app/public ./public
-COPY --from=builder --chown=1000:1000 /app/.next/static ./static
+COPY --from=builder --chown=1001:1001 /app/.next/standalone ./
+COPY --from=builder --chown=1001:1001 /app/public ./public
+COPY --from=builder --chown=1001:1001 /app/.next/static ./static
 
 USER nextjs
 
