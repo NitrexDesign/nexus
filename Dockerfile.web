@@ -24,6 +24,10 @@ COPY web/ .
 
 RUN pnpm run build
 
+# Debug: list the standalone directory
+RUN ls -la /app/.next/standalone/ || true
+RUN find /app/.next/standalone -type d -maxdepth 3 || true
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -33,19 +37,11 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy standalone output
-COPY --from=builder /app/.next/standalone ./
-# Copy static files
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# Copy standalone output - use the nested standalone directory which has the proper server.js
+COPY --from=builder /app/.next/standalone/Github/nexus/web/. ./
 
-# Ensure the nested app structure is flattened so server.js can find .next
-RUN APP_DIR=$(find . -path "*/.next" -not -path "./.next" -exec dirname {} \; | head -n 1) && \
-	if [ -n "$APP_DIR" ]; then \
-	echo "Flattening nested app structure from $APP_DIR" && \
-	cp -r $APP_DIR/. . && \
-	rm -rf $(echo $APP_DIR | cut -d/ -f2); \
-	fi
+# Rename server.js to .cjs to avoid ESM/CommonJS conflict
+RUN mv server.js server.cjs
 
 USER nextjs
 
@@ -54,4 +50,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-CMD ["node", "server.js"]
+CMD ["node", "server.cjs"]
