@@ -172,13 +172,6 @@ const WEATHER_ICONS: Record<string, React.ReactNode> = {
 };
 
 // API utility functions
-const getApiKey = (provider: 'openweathermap' | 'metoffice'): string => {
-  if (provider === 'openweathermap') {
-    return process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || '';
-  } else {
-    return process.env.NEXT_PUBLIC_METOFFICE_API_KEY || '';
-  }
-};
 
 const getCurrentLocation = (): Promise<{ lat: number; lon: number }> => {
   return new Promise((resolve, reject) => {
@@ -442,11 +435,11 @@ export function WeatherWidget({ config, onUpdateConfig, isEditing }: WidgetProps
 
         const provider = settings.provider || 'openweathermap';
         const apiKey = provider === 'openweathermap'
-          ? (settings.apiKey || getApiKey('openweathermap'))
-          : (settings.metOfficeApiKey || getApiKey('metoffice'));
+          ? settings.apiKey
+          : settings.metOfficeApiKey;
 
         if (!apiKey) {
-          throw new Error(`${provider === 'openweathermap' ? 'OpenWeatherMap' : 'Met Office'} API key is required. Please add it to your settings or environment variables.`);
+          throw new Error(`${provider === 'openweathermap' ? 'OpenWeatherMap' : 'Met Office'} API key is required. Please add it to your widget settings.`);
         }
 
         let weatherData: WeatherData;
@@ -697,7 +690,7 @@ export function WeatherWidgetSettings({ settings, onSettingsChange }: { settings
             className="w-full mt-1 p-2 border rounded-md text-sm"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            If not set, will use NEXT_PUBLIC_OPENWEATHER_API_KEY environment variable
+            Required for OpenWeatherMap API access
           </p>
         </div>
       ) : (
@@ -716,7 +709,7 @@ export function WeatherWidgetSettings({ settings, onSettingsChange }: { settings
             className="w-full mt-1 p-2 border rounded-md text-sm"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            If not set, will use NEXT_PUBLIC_METOFFICE_API_KEY environment variable
+            Required for Met Office API access
           </p>
         </div>
       )}
