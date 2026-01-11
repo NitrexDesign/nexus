@@ -34,8 +34,8 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 		rctx := chi.RouteContext(r.Context())
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
 
-		// If requesting something that looks like an API, don't fallback
-		if strings.HasPrefix(r.URL.Path, "/api") {
+		// If requesting something that looks like an API or icons, don't fallback
+		if strings.HasPrefix(r.URL.Path, "/api") || strings.HasPrefix(r.URL.Path, "/icons") {
 			http.NotFound(w, r)
 			return
 		}
