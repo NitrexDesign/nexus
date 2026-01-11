@@ -2,10 +2,17 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/nexus-homelab/nexus/internal/models"
@@ -33,7 +40,22 @@ func runTask(fn func() error) error {
 	return <-done
 }
 
+// InitDB initializes the database connection and runs migrations automatically
 func InitDB(dsn string) error {
+	if err := ConnectDB(dsn); err != nil {
+		return err
+	}
+
+	if err := runMigrations(dsn); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+
+	log.Println("Database initialized successfully")
+	return nil
+}
+
+// ConnectDB establishes a database connection and sets up connection pooling
+func ConnectDB(dsn string) error {
 	log.Println("Connecting to MySQL database...")
 
 	var err error
@@ -61,57 +83,67 @@ func InitDB(dsn string) error {
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
-	if err := createTables(); err != nil {
-		return fmt.Errorf("failed to create tables: %w", err)
-	}
-
-	log.Println("Database initialized successfully")
+	log.Println("Database connected successfully")
 	return nil
 }
 
-func createTables() error {
-	queries := []string{
-		`CREATE TABLE IF NOT EXISTS users (
-			id VARCHAR(255) PRIMARY KEY,
-			username VARCHAR(255) UNIQUE NOT NULL,
-			display_name VARCHAR(255),
-			approved BOOLEAN DEFAULT FALSE,
-			password_hash VARCHAR(255)
-		);`,
-		`CREATE TABLE IF NOT EXISTS credentials (
-			id VARBINARY(255) PRIMARY KEY,
-			user_id VARCHAR(255) NOT NULL,
-			public_key BLOB NOT NULL,
-			attestation_type VARCHAR(255) NOT NULL,
-			aaguid VARBINARY(255) NOT NULL,
-			sign_count BIGINT NOT NULL,
-			clone_warning BOOLEAN NOT NULL,
-			backup_eligible BOOLEAN NOT NULL DEFAULT FALSE,
-			backup_state BOOLEAN NOT NULL DEFAULT FALSE,
-			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-		);`,
-		`CREATE TABLE IF NOT EXISTS services (
-			id VARCHAR(255) PRIMARY KEY,
-			name VARCHAR(255) NOT NULL,
-			url VARCHAR(255) NOT NULL,
-			icon VARCHAR(255),
-			` + "`group`" + ` VARCHAR(255),
-			` + "`order`" + ` INTEGER DEFAULT 0,
-			public BOOLEAN DEFAULT FALSE,
-			auth_required BOOLEAN DEFAULT FALSE,
-			new_tab BOOLEAN DEFAULT TRUE,
-			check_health BOOLEAN DEFAULT TRUE,
-			health_status VARCHAR(50) DEFAULT 'unknown',
-			last_checked TIMESTAMP NULL DEFAULT NULL
-		);`,
-	}
+// runMigrations runs database migrations using golang-migrate
+func runMigrations(dsn string) error {
+	log.Println("Running database migrations...")
 
-	for _, q := range queries {
-		if _, err := DB.Exec(q); err != nil {
-			return err
+	// 1. Check for dirty migration state before creating migrate instance
+	var version int
+	var dirty bool
+	err := DB.QueryRow("SELECT version, dirty FROM schema_migrations LIMIT 1").Scan(&version, &dirty)
+	if err == nil && dirty {
+		log.Printf("Database is dirty at version %d, fixing by dropping migration table...", version)
+		if _, err := DB.Exec("DROP TABLE IF EXISTS schema_migrations"); err != nil {
+			log.Printf("Warning: Failed to drop dirty migration table: %v", err)
 		}
+	} else if err != nil && !strings.Contains(err.Error(), "doesn't exist") {
+		// Log other errors but continue
+		log.Printf("Note: Could not check migration status: %v", err)
 	}
 
+	// 2. Get migrations path
+	migrationsPath := "db/migrations"
+	if !filepath.IsAbs(migrationsPath) {
+		cwd, _ := os.Getwd()
+		if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
+			migrationsPath = "../db/migrations"
+			if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
+				execPath, err := os.Executable()
+				if err == nil {
+					candidatePath := filepath.Join(filepath.Dir(execPath), "..", "db", "migrations")
+					if _, err := os.Stat(candidatePath); err == nil {
+						migrationsPath = candidatePath
+					}
+				}
+			}
+		}
+		log.Printf("Using migrations at: %s (CWD: %s)", migrationsPath, cwd)
+	}
+
+	// 3. Create migrate instance using DSN to avoid closing the shared DB pool
+	// golang-migrate expects mysql:// prefix
+	m, err := migrate.New("file://"+migrationsPath, "mysql://"+dsn)
+	if err != nil {
+		return fmt.Errorf("failed to create migrate instance: %w", err)
+	}
+	defer m.Close()
+
+	// 4. Run migrations
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+
+	// 5. Final check
+	finalVersion, finalDirty, err := m.Version()
+	if err == nil {
+		log.Printf("Final migration version: %d, dirty: %t", finalVersion, finalDirty)
+	}
+
+	log.Println("Database migrations completed successfully")
 	return nil
 }
 
@@ -309,4 +341,193 @@ func toNullTime(t time.Time) sql.NullTime {
 		Time:  t,
 		Valid: !t.IsZero(),
 	}
+}
+
+// WidgetSettings represents global widget settings
+type WidgetSettings struct {
+	ID            string   `json:"id"`
+	CategoryOrder []string `json:"category_order"`
+	GridCols      int      `json:"grid_cols"`
+	GridRows      int      `json:"grid_rows"`
+}
+
+func GetWidgetSettings() (*WidgetSettings, error) {
+	var settings WidgetSettings
+	var categoryOrderJSON string
+	err := DB.QueryRow("SELECT id, category_order, grid_cols, grid_rows FROM widget_settings WHERE id = 'default'").
+		Scan(&settings.ID, &categoryOrderJSON, &settings.GridCols, &settings.GridRows)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Return default settings if none exist yet
+			return &WidgetSettings{
+				ID:            "default",
+				CategoryOrder: []string{},
+				GridCols:      4,
+				GridRows:      6,
+			}, nil
+		}
+		return nil, err
+	}
+
+	if err := json.Unmarshal([]byte(categoryOrderJSON), &settings.CategoryOrder); err != nil {
+		return nil, err
+	}
+
+	return &settings, nil
+}
+
+func UpdateWidgetSettings(settings *WidgetSettings) error {
+	return runTask(func() error {
+		categoryOrderJSON, err := json.Marshal(settings.CategoryOrder)
+		if err != nil {
+			return err
+		}
+
+		_, err = DB.Exec(`
+			INSERT INTO widget_settings (id, category_order, grid_cols, grid_rows, updated_at)
+			VALUES ('default', ?, ?, ?, NOW())
+			ON DUPLICATE KEY UPDATE
+			category_order = VALUES(category_order),
+			grid_cols = VALUES(grid_cols),
+			grid_rows = VALUES(grid_rows),
+			updated_at = NOW()
+		`, string(categoryOrderJSON), settings.GridCols, settings.GridRows)
+		return err
+	})
+}
+
+func GetWidgetCategoryOrder() ([]string, error) {
+	settings, err := GetWidgetSettings()
+	if err != nil {
+		return nil, err
+	}
+	return settings.CategoryOrder, nil
+}
+
+func SetWidgetCategoryOrder(categoryOrder []string) error {
+	settings, err := GetWidgetSettings()
+	if err != nil {
+		return err
+	}
+	settings.CategoryOrder = categoryOrder
+	return UpdateWidgetSettings(settings)
+}
+
+// WidgetConfig represents a widget configuration in the database
+type WidgetConfig struct {
+	ID         string                 `json:"id"`
+	WidgetType string                 `json:"widget_type"`
+	Position   WidgetPosition         `json:"position"`
+	Settings   map[string]interface{} `json:"settings"`
+	Enabled    bool                   `json:"enabled"`
+	SortOrder  int                    `json:"sort_order"`
+	CreatedAt  time.Time              `json:"created_at"`
+	UpdatedAt  time.Time              `json:"updated_at"`
+}
+
+type WidgetPosition struct {
+	X      int `json:"x"`
+	Y      int `json:"y"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+func GetWidgetConfigs() ([]WidgetConfig, error) {
+	rows, err := DB.Query(`
+		SELECT id, widget_type, position_x, position_y, width, height, settings, enabled, sort_order, created_at, updated_at
+		FROM widget_configs
+		ORDER BY sort_order ASC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var configs []WidgetConfig
+	for rows.Next() {
+		var config WidgetConfig
+		var settingsJSON string
+		if err := rows.Scan(
+			&config.ID, &config.WidgetType,
+			&config.Position.X, &config.Position.Y, &config.Position.Width, &config.Position.Height,
+			&settingsJSON, &config.Enabled, &config.SortOrder,
+			&config.CreatedAt, &config.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		// Parse settings JSON
+		if err := json.Unmarshal([]byte(settingsJSON), &config.Settings); err != nil {
+			return nil, err
+		}
+
+		configs = append(configs, config)
+	}
+
+	return configs, nil
+}
+
+func CreateWidgetConfig(config *WidgetConfig) error {
+	return runTask(func() error {
+		settingsJSON, err := json.Marshal(config.Settings)
+		if err != nil {
+			return err
+		}
+
+		_, err = DB.Exec(`
+			INSERT INTO widget_configs (id, widget_type, position_x, position_y, width, height, settings, enabled, sort_order)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, config.ID, config.WidgetType, config.Position.X, config.Position.Y, config.Position.Width, config.Position.Height,
+		   string(settingsJSON), config.Enabled, config.SortOrder)
+		return err
+	})
+}
+
+func UpdateWidgetConfig(config *WidgetConfig) error {
+	return runTask(func() error {
+		settingsJSON, err := json.Marshal(config.Settings)
+		if err != nil {
+			return err
+		}
+
+		_, err = DB.Exec(`
+			UPDATE widget_configs
+			SET widget_type=?, position_x=?, position_y=?, width=?, height=?, settings=?, enabled=?, sort_order=?
+			WHERE id=?
+		`, config.WidgetType, config.Position.X, config.Position.Y, config.Position.Width, config.Position.Height,
+		   string(settingsJSON), config.Enabled, config.SortOrder, config.ID)
+		return err
+	})
+}
+
+func DeleteWidgetConfig(id string) error {
+	return runTask(func() error {
+		_, err := DB.Exec("DELETE FROM widget_configs WHERE id = ?", id)
+		return err
+	})
+}
+
+func GetWidgetConfig(id string) (*WidgetConfig, error) {
+	var config WidgetConfig
+	var settingsJSON string
+
+	err := DB.QueryRow(`
+		SELECT id, widget_type, position_x, position_y, width, height, settings, enabled, sort_order, created_at, updated_at
+		FROM widget_configs WHERE id = ?
+	`, id).Scan(
+		&config.ID, &config.WidgetType,
+		&config.Position.X, &config.Position.Y, &config.Position.Width, &config.Position.Height,
+		&settingsJSON, &config.Enabled, &config.SortOrder,
+		&config.CreatedAt, &config.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse settings JSON
+	if err := json.Unmarshal([]byte(settingsJSON), &config.Settings); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }

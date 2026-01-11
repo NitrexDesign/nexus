@@ -74,8 +74,10 @@ func main() {
 	dbHost := getEnv("DB_HOST", "mysql")
 	dbPort := getEnv("DB_PORT", "3306")
 	dbName := getEnv("DB_NAME", "nexus")
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPass, dbHost, dbPort, dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&multiStatements=true", dbUser, dbPass, dbHost, dbPort, dbName)
 
+	log.Printf("Initializing database with DSN: %s:*****@tcp(%s:%s)/%s", dbUser, dbHost, dbPort, dbName)
+	log.Println("Database migrations will run automatically on startup")
 	if err := db.InitDB(dsn); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
