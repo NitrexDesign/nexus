@@ -9,61 +9,7 @@ const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'nexus_widgets';
 
-const DEFAULT_WIDGETS: WidgetConfig[] = [
-  // Date & Time widget - top left
-  {
-    id: 'datetime-1',
-    type: 'datetime',
-    position: { x: 0, y: 0, width: 2, height: 1 },
-    settings: {
-      format: 'full',
-      timezone: 'local',
-      showSeconds: true,
-    },
-    enabled: true,
-    order: 0,
-  },
-  // Weather widget - top right
-  {
-    id: 'weather-1',
-    type: 'weather',
-    position: { x: 2, y: 0, width: 2, height: 2 },
-    settings: {
-      location: 'auto',
-      unit: 'celsius',
-      showForecast: true,
-      provider: 'openweathermap',
-      apiKey: '',
-      metOfficeApiKey: '',
-    },
-    enabled: true,
-    order: 1,
-  },
-  // Todo widget - middle left
-  {
-    id: 'todo-1',
-    type: 'todo',
-    position: { x: 0, y: 1, width: 2, height: 3 },
-    settings: {
-      maxItems: 5,
-      showCompleted: false,
-    },
-    enabled: true,
-    order: 2,
-  },
-  // Search widget - bottom
-  {
-    id: 'search-1',
-    type: 'search',
-    position: { x: 0, y: 4, width: 4, height: 1 },
-    settings: {
-      defaultEngine: 'google',
-      showSuggestions: true,
-    },
-    enabled: true,
-    order: 3,
-  },
-];
+const DEFAULT_WIDGETS: WidgetConfig[] = [];
 
 // Backend API types
 interface BackendWidgetConfig {

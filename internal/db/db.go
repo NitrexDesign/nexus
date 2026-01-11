@@ -500,13 +500,34 @@ func UpdateWidgetConfig(config *WidgetConfig) error {
 			return err
 		}
 
-		_, err = DB.Exec(`
+		// First try to update the existing widget
+		result, err := DB.Exec(`
 			UPDATE widget_configs
-			SET widget_type=?, position_x=?, position_y=?, width=?, height=?, settings=?, enabled=?, sort_order=?
+			SET widget_type=?, position_x=?, position_y=?, width=?, height=?, settings=?, enabled=?, sort_order=?, updated_at=NOW()
 			WHERE id=?
 		`, config.WidgetType, config.Position.X, config.Position.Y, config.Position.Width, config.Position.Height,
 		   string(settingsJSON), config.Enabled, config.SortOrder, config.ID)
-		return err
+
+		if err != nil {
+			return err
+		}
+
+		// Check if any rows were affected (widget exists)
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		// If no rows were affected, the widget doesn't exist, so create it
+		if rowsAffected == 0 {
+			return DB.QueryRow(`
+				INSERT INTO widget_configs (id, widget_type, position_x, position_y, width, height, settings, enabled, sort_order)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`, config.ID, config.WidgetType, config.Position.X, config.Position.Y, config.Position.Width, config.Position.Height,
+			   string(settingsJSON), config.Enabled, config.SortOrder).Err()
+		}
+
+		return nil
 	})
 }
 
