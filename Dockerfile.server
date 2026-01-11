@@ -10,6 +10,7 @@ WORKDIR /app
 RUN addgroup -g 1000 app && adduser -u 1000 -G app -s /bin/sh -D app
 
 COPY --from=builder --chown=1000:1000 /app/nexus .
+COPY --from=builder --chown=1000:1000 /app/db/migrations ./db/migrations
 RUN mkdir -p /app/data /app/data/icons && chown -R 1000:1000 /app
 
 USER app

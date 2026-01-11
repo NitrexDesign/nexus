@@ -106,22 +106,32 @@ func runMigrations(dsn string) error {
 	}
 
 	// 2. Get migrations path
-	migrationsPath := "db/migrations"
-	if !filepath.IsAbs(migrationsPath) {
+	var migrationsPath string
+
+	// First try relative to executable (works in Docker containers)
+	execPath, err := os.Executable()
+	if err == nil {
+		candidatePath := filepath.Join(filepath.Dir(execPath), "db", "migrations")
+		if _, err := os.Stat(candidatePath); err == nil {
+			migrationsPath = candidatePath
+		}
+	}
+
+	// Fallback to relative paths from working directory
+	if migrationsPath == "" {
 		cwd, _ := os.Getwd()
-		if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
+		// Try current directory first
+		if _, err := os.Stat("db/migrations"); err == nil {
+			migrationsPath = "db/migrations"
+		} else if _, err := os.Stat("../db/migrations"); err == nil {
+			// Try parent directory (for development)
 			migrationsPath = "../db/migrations"
-			if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
-				execPath, err := os.Executable()
-				if err == nil {
-					candidatePath := filepath.Join(filepath.Dir(execPath), "..", "db", "migrations")
-					if _, err := os.Stat(candidatePath); err == nil {
-						migrationsPath = candidatePath
-					}
-				}
-			}
 		}
 		log.Printf("Using migrations at: %s (CWD: %s)", migrationsPath, cwd)
+	}
+
+	if migrationsPath == "" {
+		return fmt.Errorf("could not find migrations directory")
 	}
 
 	// 3. Create migrate instance using DSN to avoid closing the shared DB pool
