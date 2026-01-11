@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { WidgetConfig, WidgetContextType } from './types';
 import { widgetRegistry } from './registry';
+import { toast } from 'sonner';
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
@@ -123,11 +124,17 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
           setWidgets(frontendWidgets);
         } else {
           console.error('Failed to load widgets from API, status:', res.status);
-          setWidgets([]);
+          // Fall back to default widgets if API fails
+          console.warn('Using default widgets due to API failure');
+          setWidgets(DEFAULT_WIDGETS);
+          toast.error('Failed to load saved widgets. Using defaults.');
         }
       } catch (error) {
         console.error('Failed to load widgets:', error);
-        setWidgets([]);
+        // Fall back to default widgets if API fails
+        console.warn('Using default widgets due to connection error');
+        setWidgets(DEFAULT_WIDGETS);
+        toast.error('Failed to connect to server. Using default widgets.');
       }
     };
 
@@ -208,11 +215,14 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
         const createdConfig: BackendWidgetConfig = await res.json();
         const frontendWidget = backendToFrontend(createdConfig);
         setWidgets(prev => [...prev, frontendWidget]);
+        toast.success(`${definition?.name || 'Widget'} added successfully`);
       } else {
         console.error('Failed to create widget, status:', res.status);
+        toast.error('Failed to add widget. Please try again.');
       }
     } catch (error) {
       console.error('Failed to create widget:', error);
+      toast.error('Failed to add widget. Please check your connection.');
     }
   };
 
@@ -224,11 +234,14 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
       if (res.ok) {
         setWidgets(prev => prev.filter(widget => widget.id !== id));
+        toast.success('Widget removed successfully');
       } else {
         console.error('Failed to delete widget, status:', res.status);
+        toast.error('Failed to remove widget. Please try again.');
       }
     } catch (error) {
       console.error('Failed to delete widget:', error);
+      toast.error('Failed to remove widget. Please check your connection.');
     }
   };
 
@@ -255,9 +268,11 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
         ));
       } else {
         console.error('Failed to update widget, status:', res.status);
+        toast.error('Failed to update widget. Please try again.');
       }
     } catch (error) {
       console.error('Failed to update widget:', error);
+      toast.error('Failed to update widget. Please check your connection.');
     }
   };
 
