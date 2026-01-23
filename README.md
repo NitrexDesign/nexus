@@ -64,7 +64,6 @@ Then you are likely running the backend locally while your database is not acces
     ```
 
   - If you installed MySQL on your host, ensure the service is running (examples):
-
     - Debian/Ubuntu: `sudo systemctl start mysql`
     - Arch Linux: `sudo systemctl start mysqld`
     - Fedora/CentOS: `sudo systemctl start mariadb`
@@ -126,8 +125,9 @@ If you encounter migration errors, you can:
 1. Check the connection with Drizzle Studio: `make migrate-studio`
 2. Reset the database and re-run migrations (destructive)
 3. Manually inspect the `__drizzle_migrations` table in MySQL
-make migrate
-```
+   make migrate
+
+````
 
 The migration system automatically handles corrupted `schema_migrations` tables and will recreate them as needed.
 
@@ -137,7 +137,7 @@ The weather widget requires an API key from [OpenWeatherMap](https://openweather
 
 ```bash
 export OPENWEATHER_API_KEY=your_api_key_here
-```
+````
 
 ## 🧩 Widget System
 
