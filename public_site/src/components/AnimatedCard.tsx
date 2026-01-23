@@ -1,17 +1,35 @@
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
+import {
+  Zap,
+  Fingerprint,
+  Palette,
+  LayoutDashboard,
+  ShieldCheck,
+  Container,
+} from "lucide-react";
+
+const iconMap = {
+  Zap,
+  Fingerprint,
+  Palette,
+  LayoutDashboard,
+  ShieldCheck,
+  Container,
+};
 
 interface AnimatedCardProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: keyof typeof iconMap;
 }
 
 export default function AnimatedCard({
   title,
   description,
-  icon: Icon,
+  icon,
 }: AnimatedCardProps) {
+  const Icon = iconMap[icon];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

@@ -1,51 +1,43 @@
 ---
 import "../styles/global.css";
 import AnimatedCard from "../components/AnimatedCard";
-import {
-  Zap,
-  Fingerprint,
-  Palette,
-  LayoutDashboard,
-  ShieldCheck,
-  Container,
-} from "lucide-react";
 
 const features = [
   {
     title: "High Performance",
     description:
       "Built with TypeScript (Bun) and Next.js for blazing-fast response times and modern DX.",
-    icon: Zap,
+    icon: "Zap" as const,
   },
   {
     title: "Passkey Security",
     description:
       "Next-gen authentication with WebAuthn support. No more passwords to remember.",
-    icon: Fingerprint,
+    icon: "Fingerprint" as const,
   },
   {
     title: "Modern UI/UX",
     description:
       "Beautifully crafted interface using shadcn/ui, Tailwind CSS, and Framer Motion.",
-    icon: Palette,
+    icon: "Palette" as const,
   },
   {
     title: "Service Aggregator",
     description:
       "One dashboard for all your self-hosted apps. Health checks and status monitoring built-in.",
-    icon: LayoutDashboard,
+    icon: "LayoutDashboard" as const,
   },
   {
     title: "Admin Control",
     description:
       "Robust user management with approval workflows and granular permission controls.",
-    icon: ShieldCheck,
+    icon: "ShieldCheck" as const,
   },
   {
     title: "Cloud Native",
     description:
       "Docker-first approach. Deploy anywhere with ease using our pre-built images.",
-    icon: Container,
+    icon: "Container" as const,
   },
 ];
 ---
