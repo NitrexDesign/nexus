@@ -42,15 +42,16 @@ jobs:
             type=ref,event=branch
             type=sha,format=short
 
-      - name: Build and push server image
+      - name: Build and push core image
         uses: useblacksmith/build-push-action@v2
         with:
           context: .
-          file: Dockerfile.server
+          file: Dockerfile.core
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:master
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-core:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-core:master
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-core:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push web image
@@ -60,6 +61,7 @@ jobs:
           file: Dockerfile.web
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:master
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}

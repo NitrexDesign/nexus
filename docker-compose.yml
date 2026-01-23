@@ -3,7 +3,7 @@ services:
   mysql:
     image: mysql:8.0
     ports:
-      - "3306:3306"
+      - "3304:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
       - MYSQL_DATABASE=nexus
@@ -23,7 +23,7 @@ services:
     image: clickhouse/clickhouse-server:latest
     ports:
       - "8123:8123"
-      - "9000:9000"
+      - "9002:9000"
     environment:
       - CLICKHOUSE_USER=nexus
       - CLICKHOUSE_PASSWORD=nexus_password
@@ -37,24 +37,25 @@ services:
       retries: 10
     networks:
       - nexus-network
-
-  server:
+  
+  # TypeScript/Bun backend
+  core:
     build:
       context: .
-      dockerfile: Dockerfile.server
+      dockerfile: Dockerfile.core
     ports:
       - "8080:8080"
     volumes:
       - nexus-data:/app/data
     environment:
-      - PORT=8080
-      - API_PORT=8081
-      - DB_TYPE=mysql
+      - API_PORT=8080
       - DB_USER=nexus
       - DB_PASSWORD=nexus_password
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_NAME=nexus
+      - DB_CONNECT_RETRIES=30
+      - DB_CONNECT_DELAY=5000
       - CLICKHOUSE_HOST=clickhouse
       - CLICKHOUSE_PORT=8123
       - CLICKHOUSE_USER=nexus
@@ -63,6 +64,9 @@ services:
       - WEBAUTHN_RP_NAME=Nexus
       - WEBAUTHN_RP_ID=start.holroydnet.uk
       - WEBAUTHN_RP_ORIGIN=https://start.holroydnet.uk
+      - HEALTH_CHECK_INTERVAL=5
+      - ICONS_DIR=/app/data/icons
+      - WEB_DIST_DIR=/app/web/dist
     depends_on:
       mysql:
         condition: service_healthy
@@ -76,12 +80,12 @@ services:
       context: .
       dockerfile: Dockerfile.web
     ports:
-      - "3000:3000"
+      - "3008:3000"
     environment:
       - PORT=3000
-      - API_URL=http://server:8081
+      - API_URL=http://core:8080
     depends_on:
-      - server
+      - core
     networks:
       - nexus-network
 

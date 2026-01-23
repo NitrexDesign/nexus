@@ -23,7 +23,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Loader2, Search, ChevronsUpDown, Check, Plus, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  ChevronsUpDown,
+  Check,
+  Plus,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api-client";
@@ -65,12 +72,16 @@ export function ServiceDialog({
 }: ServiceDialogProps) {
   const [groupPopoverOpen, setGroupPopoverOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [foundIcons, setFoundIcons] = useState<string[]>([]);
+  const [foundIcons, setFoundIcons] = useState<
+    Array<{ url: string; type: string }>
+  >([]);
 
   const searchMutation = useMutation({
     mutationFn: async () => {
       if (!formData.url) return [];
-      const res = await apiFetch(`/api/icons/search?url=${encodeURIComponent(formData.url)}`);
+      const res = await apiFetch(
+        `/api/icons/search?url=${encodeURIComponent(formData.url)}`,
+      );
       return res.json();
     },
     onSuccess: (data) => setFoundIcons(data || []),
@@ -121,13 +132,18 @@ export function ServiceDialog({
             </div>
             <div className="grid gap-2">
               <Label>Group / Category</Label>
-              <Popover open={groupPopoverOpen} onOpenChange={setGroupPopoverOpen}>
+              <Popover
+                open={groupPopoverOpen}
+                onOpenChange={setGroupPopoverOpen}
+              >
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className="justify-between font-normal"
                   >
-                    <span className="truncate">{formData.group || "Select..."}</span>
+                    <span className="truncate">
+                      {formData.group || "Select..."}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -148,7 +164,8 @@ export function ServiceDialog({
                             setGroupPopoverOpen(false);
                           }}
                         >
-                          <Plus className="mr-2 h-3 w-3" /> Create "{searchValue}"
+                          <Plus className="mr-2 h-3 w-3" /> Create "
+                          {searchValue}"
                         </Button>
                       </CommandEmpty>
                       <CommandGroup>
@@ -212,10 +229,10 @@ export function ServiceDialog({
                 <button
                   key={i}
                   className="aspect-square rounded-md border bg-background hover:border-primary flex items-center justify-center p-1 transition-all hover:scale-105"
-                  onClick={() => handleSelectRemoteIcon(icon)}
+                  onClick={() => handleSelectRemoteIcon(icon.url)}
                 >
                   <img
-                    src={icon}
+                    src={icon.url}
                     alt={`Icon ${i}`}
                     className="max-w-full max-h-full object-contain"
                   />
@@ -270,7 +287,9 @@ export function ServiceDialog({
               <div
                 className={cn(
                   "flex flex-col items-center justify-center rounded-lg border p-2 hover:bg-muted/30 transition-colors cursor-pointer text-center gap-1",
-                  (formData.public && !formData.auth_required) && "border-primary bg-primary/5"
+                  formData.public &&
+                    !formData.auth_required &&
+                    "border-primary bg-primary/5",
                 )}
                 onClick={() =>
                   setFormData({
@@ -280,8 +299,15 @@ export function ServiceDialog({
                   })
                 }
               >
-                <RadioGroupItem value="public" id="public" className="sr-only" />
-                <Label htmlFor="public" className="font-bold cursor-pointer text-xs">
+                <RadioGroupItem
+                  value="public"
+                  id="public"
+                  className="sr-only"
+                />
+                <Label
+                  htmlFor="public"
+                  className="font-bold cursor-pointer text-xs"
+                >
                   Public
                 </Label>
                 <span className="text-[10px] text-muted-foreground leading-tight">
@@ -291,7 +317,9 @@ export function ServiceDialog({
               <div
                 className={cn(
                   "flex flex-col items-center justify-center rounded-lg border p-2 hover:bg-muted/30 transition-colors cursor-pointer text-center gap-1",
-                  (formData.public && formData.auth_required) && "border-primary bg-primary/5"
+                  formData.public &&
+                    formData.auth_required &&
+                    "border-primary bg-primary/5",
                 )}
                 onClick={() =>
                   setFormData({
@@ -301,8 +329,15 @@ export function ServiceDialog({
                   })
                 }
               >
-                <RadioGroupItem value="secured" id="secured" className="sr-only" />
-                <Label htmlFor="secured" className="font-bold cursor-pointer text-xs">
+                <RadioGroupItem
+                  value="secured"
+                  id="secured"
+                  className="sr-only"
+                />
+                <Label
+                  htmlFor="secured"
+                  className="font-bold cursor-pointer text-xs"
+                >
                   Secured
                 </Label>
                 <span className="text-[10px] text-muted-foreground leading-tight">
@@ -312,7 +347,7 @@ export function ServiceDialog({
               <div
                 className={cn(
                   "flex flex-col items-center justify-center rounded-lg border p-2 hover:bg-muted/30 transition-colors cursor-pointer text-center gap-1",
-                  (!formData.public) && "border-primary bg-primary/5"
+                  !formData.public && "border-primary bg-primary/5",
                 )}
                 onClick={() =>
                   setFormData({
@@ -322,8 +357,15 @@ export function ServiceDialog({
                   })
                 }
               >
-                <RadioGroupItem value="private" id="private" className="sr-only" />
-                <Label htmlFor="private" className="font-bold cursor-pointer text-xs">
+                <RadioGroupItem
+                  value="private"
+                  id="private"
+                  className="sr-only"
+                />
+                <Label
+                  htmlFor="private"
+                  className="font-bold cursor-pointer text-xs"
+                >
                   Private
                 </Label>
                 <span className="text-[10px] text-muted-foreground leading-tight">
@@ -333,7 +375,12 @@ export function ServiceDialog({
             </RadioGroup>
           </div>
 
-          <div className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setFormData({ ...formData, check_health: !formData.check_health })}>
+          <div
+            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+            onClick={() =>
+              setFormData({ ...formData, check_health: !formData.check_health })
+            }
+          >
             <Checkbox
               id="check_health"
               checked={formData.check_health !== false}
@@ -342,7 +389,10 @@ export function ServiceDialog({
               }
             />
             <div className="flex-1 cursor-pointer">
-              <Label htmlFor="check_health" className="font-bold flex items-center gap-2 cursor-pointer text-sm">
+              <Label
+                htmlFor="check_health"
+                className="font-bold flex items-center gap-2 cursor-pointer text-sm"
+              >
                 Enable health checking
               </Label>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -351,7 +401,12 @@ export function ServiceDialog({
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setFormData({ ...formData, new_tab: !formData.new_tab })}>
+          <div
+            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+            onClick={() =>
+              setFormData({ ...formData, new_tab: !formData.new_tab })
+            }
+          >
             <Checkbox
               id="new_tab"
               checked={formData.new_tab !== false}
@@ -360,8 +415,12 @@ export function ServiceDialog({
               }
             />
             <div className="flex-1 cursor-pointer">
-              <Label htmlFor="new_tab" className="font-bold flex items-center gap-2 cursor-pointer text-sm">
-                Open in new tab <ExternalLink size={14} className="opacity-50" />
+              <Label
+                htmlFor="new_tab"
+                className="font-bold flex items-center gap-2 cursor-pointer text-sm"
+              >
+                Open in new tab{" "}
+                <ExternalLink size={14} className="opacity-50" />
               </Label>
             </div>
           </div>

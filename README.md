@@ -7,7 +7,7 @@
 
 ## ✨ Features
 
-- ⚡ **Extremely Fast**: Built with a Go backend and a lightweight React frontend, it's designed to be snappy and efficient.
+- ⚡ **Extremely Fast**: Built with a TypeScript (Bun) backend and a lightweight React frontend, it's designed to be snappy and efficient.
 - 🔑 **Passkey Support**: Secure, passwordless authentication using WebAuthn/Passkeys. No more memorizing passwords for your dashboard.
 - 🎨 **Premium Design**: Crafted with [shadcn/ui](https://ui.shadcn.com/) and Tailwind CSS for a state-of-the-art, premium aesthetic.
 - 🛠️ **Service Management**: Easily add, group, and manage your homelab services with icon auto-discovery.
@@ -18,7 +18,7 @@
 
 ## 🛠 Tech Stack
 
-- **Backend**: Go (Chi, WebAuthn, MySQL)
+- **Backend**: TypeScript (Bun, Hono, Drizzle ORM, MySQL, ClickHouse)
 - **Frontend**: React, TypeScript, Vite
 - **UI Components**: shadcn/ui, Lucide Icons, Sonner (toasts)
 - **Styling**: Tailwind CSS
@@ -37,12 +37,59 @@ Access the dashboard at `http://localhost:8080`.
 
 Nexus uses a migration system to manage database schema changes. **Migrations are automatically run when the server starts**, ensuring your database schema is always up to date. You can also manage them manually if needed:
 
+**Connection tuning:** When running the server in environments where the database may take longer to start (for example Docker), you can tune the connection behavior with environment variables:
+
+- `DB_CONNECT_RETRIES` (default: `30`) — number of connection attempts before failing
+- `DB_CONNECT_DELAY` (default: `5`) — number of seconds to wait between attempts
+
+These are useful when your MySQL container starts slowly; increasing time/delay prevents the server from exiting early while the DB initializes.
+
+### Troubleshooting connection errors
+
+If you see logs like:
+
+```
+Failed to connect to database (attempt 1/30): dial tcp: lookup mysql: no such host
+```
+
+Then you are likely running the backend locally while your database is not accessible at the Docker service name `mysql`. Fixes:
+
+- Start the MySQL container: `docker compose up -d mysql` (or `docker compose up -d`).
+- Or point the server to a locally reachable host. Quick helpers:
+  - Create a `.env` with `DB_HOST=127.0.0.1` (and other DB vars) manually, or run:
+
+    ```bash
+    make use-host-db    # creates a .env pointing to 127.0.0.1 (does not overwrite existing .env)
+    make check-host-db  # runs a mysqladmin ping using .env credentials (requires mysqladmin client)
+    ```
+
+  - If you installed MySQL on your host, ensure the service is running (examples):
+
+    - Debian/Ubuntu: `sudo systemctl start mysql`
+    - Arch Linux: `sudo systemctl start mysqld`
+    - Fedora/CentOS: `sudo systemctl start mariadb`
+
+  - To create the `nexus` DB and user (run as a DB admin/root user):
+
+    ```sql
+    CREATE DATABASE nexus;
+    CREATE USER 'nexus'@'localhost' IDENTIFIED BY 'nexus_password';
+    GRANT ALL PRIVILEGES ON nexus.* TO 'nexus'@'localhost';
+    FLUSH PRIVILEGES;
+    ```
+
+- For macOS/Windows Docker Desktop, you can use `host.docker.internal` from inside containers — if your server runs in a container and you want it to talk to a host DB, use that hostname.
+- When running the server in Docker (the `server` service), the hostname `mysql` is correct and will resolve automatically.
+
 ### Using Make commands (recommended)
 
-Create a `.env` file in the project root with your database configuration:
+- Start development (with DB container bootstrap): `make dev-with-db` — starts MySQL & ClickHouse containers, waits for MySQL health, and then runs `make dev`.
+
+### Running Migrations
+
+Nexus uses **Drizzle ORM** for database migrations. Create a `.env` file in the `core/` directory with your database configuration:
 
 ```bash
-DB_TYPE=mysql
 DB_USER=nexus
 DB_PASSWORD=nexus_password
 DB_HOST=localhost
@@ -50,53 +97,35 @@ DB_PORT=3306
 DB_NAME=nexus
 ```
 
-Then run the commands (they will automatically load the .env file):
+Then run the migration commands:
 
 ```bash
 # Run all pending migrations
 make migrate
 
-# Check migration status
-make migrate-status
+# Generate new migrations from schema changes
+make migrate-generate
 
-# Rollback the last migration
-make migrate-down
+# Open Drizzle Studio (database GUI)
+make migrate-studio
 ```
 
-Alternatively, set environment variables manually:
+Or use the core package scripts directly:
 
 ```bash
-DB_USER=nexus DB_PASSWORD=nexus_password DB_HOST=localhost DB_PORT=3306 DB_NAME=nexus make migrate
-```
-
-### Using the migration script directly
-
-```bash
-# Run migrations
-go run scripts/migrate.go "nexus:nexus_password@tcp(localhost:3306)/nexus?multiStatements=true" up
-
-# Check status
-go run scripts/migrate.go "nexus:nexus_password@tcp(localhost:3306)/nexus?multiStatements=true" status
-
-# Show current version
-go run scripts/migrate.go "nexus:nexus_password@tcp(localhost:3306)/nexus?multiStatements=true" version
-
-# Rollback one migration
-go run scripts/migrate.go "nexus:nexus_password@tcp(localhost:3306)/nexus?multiStatements=true" down
-
-# Force version (fix dirty state)
-go run scripts/migrate.go "nexus:nexus_password@tcp(localhost:3306)/nexus?multiStatements=true" force 1
+cd core
+bun run db:migrate    # Run migrations
+bun run db:generate   # Generate migrations
+bun run db:studio     # Open Drizzle Studio
 ```
 
 ### Troubleshooting Migration Issues
 
-If you encounter migration errors related to the `schema_migrations` table, you can reset the migration state:
+If you encounter migration errors, you can:
 
-```bash
-# Reset migration tracking (drops schema_migrations table)
-mysql -h localhost -u nexus -p nexus < scripts/reset_migrations.sql
-
-# Then run migrations again
+1. Check the connection with Drizzle Studio: `make migrate-studio`
+2. Reset the database and re-run migrations (destructive)
+3. Manually inspect the `__drizzle_migrations` table in MySQL
 make migrate
 ```
 
@@ -124,17 +153,20 @@ Nexus features a powerful, customizable widget system that allows you to persona
 ### Technical Architecture
 
 **Backend Storage:**
+
 - **Polymorphic Settings**: Each widget stores its configuration as JSON in the database
 - **RESTful API**: Full CRUD operations for widget management
 - **Database Schema**: Separate tables for widget configurations and global settings
 
 **Frontend Features:**
+
 - **Drag & Drop**: Intuitive grid-based positioning system
 - **Real-time Updates**: Changes sync immediately with the backend
 - **Responsive Design**: Widgets adapt to different screen sizes
 - **Category Organization**: Widgets grouped by functionality
 
 **API Endpoints:**
+
 - `GET/POST/PUT/DELETE /api/widgets/configs` - Widget configuration management
 - `GET/PUT /api/widgets/category-order` - Widget category ordering
 
@@ -153,6 +185,7 @@ The polymorphic design means any widget can store arbitrary configuration data w
 This project serves as a testament to the speed and capability of modern AI coding agents. While the code might be "slop" in the sense that an AI generated the bulk of it, the result is a highly functional, secure, and beautiful tool that meets every requirement perfectly.
 
 ---
-*Built with ❤️ (and high-speed LLMs)*
+
+_Built with ❤️ (and high-speed LLMs)_
 
 (this description is also AI generated)
