@@ -53,29 +53,8 @@ export const services = mysqlTable("services", {
   lastChecked: timestamp("last_checked"),
 });
 
-// Widget settings table
-export const widgetSettings = mysqlTable("widget_settings", {
-  id: varchar("id", { length: 255 }).primaryKey().default("default"),
-  categoryOrder: json("category_order").$type<string[]>(),
-  gridCols: int("grid_cols").default(4).notNull(),
-  gridRows: int("grid_rows").default(6).notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-// Widget configs table
-export const widgetConfigs = mysqlTable("widget_configs", {
-  id: varchar("id", { length: 255 }).primaryKey(),
-  widgetType: varchar("widget_type", { length: 255 }).notNull(),
-  positionX: int("position_x").notNull(),
-  positionY: int("position_y").notNull(),
-  width: int("width").notNull(),
-  height: int("height").notNull(),
-  settings: json("settings").$type<Record<string, any>>().notNull(),
-  enabled: boolean("enabled").default(true).notNull(),
-  sortOrder: int("sort_order").default(0).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+// Widgets removed - tables dropped via migration
+// If you need the schema, refer to previous migration files for the original definitions.
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

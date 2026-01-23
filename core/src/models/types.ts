@@ -35,35 +35,7 @@ export interface Service {
   lastChecked: Date | null;
 }
 
-// Widget types
-export interface WidgetSettings {
-  id: string;
-  categoryOrder: string[] | null;
-  gridCols: number;
-  gridRows: number;
-  updatedAt: Date;
-}
-
-export interface WidgetConfig {
-  id: string;
-  widgetType: string;
-  positionX: number;
-  positionY: number;
-  width: number;
-  height: number;
-  settings: Record<string, any>;
-  enabled: boolean;
-  sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface WidgetPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+// Widgets feature removed — types deleted
 
 // Health check types
 export interface HealthPoint {

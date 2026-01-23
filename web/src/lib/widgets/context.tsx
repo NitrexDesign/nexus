@@ -1,22 +1,13 @@
-"use client";
+// Widgets feature removed — context stub for compatibility
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { WidgetConfig, WidgetContextType } from "./types";
-import { widgetRegistry } from "./registry";
-import { toast } from "sonner";
-import { apiFetch } from "../api-client";
+export function WidgetProvider({ children }: { children: any }) {
+  // No-op provider - widgets feature removed
+  return children;
+}
 
-const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
-
-const STORAGE_KEY = "nexus_widgets";
-
-const DEFAULT_WIDGETS: WidgetConfig[] = [];
+export function useWidgets() {
+  throw new Error("Widgets feature has been removed");
+}
 
 // Backend API types
 interface BackendWidgetConfig {

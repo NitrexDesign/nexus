@@ -13,7 +13,7 @@ import * as authHandlers from "./auth/handlers";
 import * as serviceHandlers from "./api/services";
 import * as iconHandlers from "./api/icons";
 import * as userHandlers from "./api/users";
-import * as widgetHandlers from "./api/widgets";
+// Widgets API removed
 
 const app = new Hono();
 
@@ -65,22 +65,7 @@ app.get("/api/users", userHandlers.getUsers);
 app.put("/api/users/:id/approve", userHandlers.approveUser);
 app.delete("/api/users/:id", userHandlers.deleteUser);
 
-// Widget routes
-app.get("/api/widgets/settings", widgetHandlers.getWidgetSettings);
-app.put("/api/widgets/settings", widgetHandlers.updateWidgetSettings);
-app.get(
-  "/api/widgets/settings/category-order",
-  widgetHandlers.getCategoryOrder,
-);
-app.put(
-  "/api/widgets/settings/category-order",
-  widgetHandlers.updateCategoryOrder,
-);
-app.get("/api/widgets", widgetHandlers.getWidgetConfigs);
-app.post("/api/widgets", widgetHandlers.createWidgetConfig);
-app.get("/api/widgets/:id", widgetHandlers.getWidgetConfig);
-app.put("/api/widgets/:id", widgetHandlers.updateWidgetConfig);
-app.delete("/api/widgets/:id", widgetHandlers.deleteWidgetConfig);
+// Widget API removed
 
 // Serve icons from data/icons directory
 const iconsPath = path.resolve(process.cwd(), config.iconsDir);

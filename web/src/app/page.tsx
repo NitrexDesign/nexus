@@ -4,9 +4,6 @@ import dynamic from "next/dynamic";
 import { Navbar } from "@/components/Navbar";
 import { FloatingNav } from "@/components/FloatingNav";
 import { useState, useEffect } from "react";
-import { WidgetProvider } from "@/lib/widgets";
-// Import to register widgets
-import "@/lib/widgets";
 
 const PublicDashboard = dynamic(
   () => import("@/components/PublicDashboard").then((m) => m.PublicDashboard),
@@ -42,7 +39,7 @@ export default function Page() {
   }
 
   return (
-    <WidgetProvider>
+    <>
       <Navbar
         user={user}
         onLogout={handleLogout}
@@ -51,6 +48,6 @@ export default function Page() {
       />
       <PublicDashboard search={search} />
       <FloatingNav />
-    </WidgetProvider>
+    </>
   );
 }

@@ -1,78 +1,15 @@
-// Widget registry initialization
-import { widgetRegistry } from './registry';
-import { DateTimeWidget, DateTimeWidgetSettings } from '@/components/widgets/DateTimeWidget';
-import { TodoWidget, TodoWidgetSettings } from '@/components/widgets/TodoWidget';
-import { SearchWidget, SearchWidgetSettings } from '@/components/widgets/SearchWidget';
-import { WeatherWidget, WeatherWidgetSettings } from '@/components/widgets/WeatherWidget';
+// Widgets feature removed — stub exports to avoid runtime errors
 
-// Register all available widgets
-widgetRegistry.register({
-  id: 'datetime',
-  name: 'Date & Time',
-  description: 'Display current date and time with customizable format',
-  icon: '🕐',
-  category: 'utility',
-  defaultSize: { width: 2, height: 1 },
-  defaultSettings: {
-    format: 'full',
-    timezone: 'local',
-    showSeconds: true,
-  },
-  component: DateTimeWidget,
-  settingsComponent: DateTimeWidgetSettings,
-});
+export const widgetRegistry = {
+  get: () => undefined,
+  getAll: () => [],
+  getCategories: () => [] as string[],
+};
 
-widgetRegistry.register({
-  id: 'weather',
-  name: 'Weather',
-  description: 'Current weather and forecast for your location',
-  icon: '🌤️',
-  category: 'information',
-  defaultSize: { width: 2, height: 2 },
-  defaultSettings: {
-    location: 'auto',
-    unit: 'celsius',
-    showForecast: true,
-    provider: 'openweathermap',
-    apiKey: '',
-    metOfficeApiKey: '',
-  },
-  component: WeatherWidget,
-  settingsComponent: WeatherWidgetSettings,
-});
+export function useWidgets() {
+  throw new Error("Widgets feature has been removed");
+}
 
-widgetRegistry.register({
-  id: 'todo',
-  name: 'Todo List',
-  description: 'Manage your tasks and stay organized',
-  icon: '✅',
-  category: 'productivity',
-  defaultSize: { width: 2, height: 3 },
-  minSize: { width: 2, height: 2 },
-  defaultSettings: {
-    maxItems: 5,
-    showCompleted: false,
-  },
-  component: TodoWidget,
-  settingsComponent: TodoWidgetSettings,
-});
+export const WidgetProvider = ({ children }: { children: any }) => children;
 
-widgetRegistry.register({
-  id: 'search',
-  name: 'Web Search',
-  description: 'Quick search with multiple search engines',
-  icon: '🔍',
-  category: 'utility',
-  defaultSize: { width: 4, height: 1 },
-  defaultSettings: {
-    defaultEngine: 'google',
-    showSuggestions: true,
-  },
-  component: SearchWidget,
-  settingsComponent: SearchWidgetSettings,
-});
-
-// Export the registry for use in components
-export { widgetRegistry } from './registry';
-export { useWidgets, WidgetProvider } from './context';
-export type { WidgetConfig, WidgetDefinition } from './types';
+// NOTE: widget types and actual implementation have been removed.
