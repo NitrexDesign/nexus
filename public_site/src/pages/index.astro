@@ -5,7 +5,7 @@ import AnimatedCard from '../components/AnimatedCard';
 const features = [
   {
     title: "High Performance",
-    description: "Built with a Go backend and React frontend for sub-millisecond response times.",
+    description: "Built with TypeScript (Bun) and Next.js for blazing-fast response times and modern DX.",
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap"><path d="M4 14.5L12 3v9h8L12 21v-9H4z"/></svg>`
   },
   {
@@ -77,7 +77,7 @@ const features = [
 							The dashboard your <span class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">homelab</span> deserves.
 						</h1>
 						<p class="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-							Nexus is a blazingly fast service aggregator built with Go and React. 
+							Nexus is a modern service aggregator built with TypeScript and Next.js. 
 							Secure by default with Passkey support, designed for speed and simplicity.
 						</p>
 						<div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -115,8 +115,8 @@ const features = [
 							<div>
 								<h2 class="text-3xl md:text-4xl font-bold mb-6">Up and running in minutes.</h2>
 								<p class="text-muted-foreground mb-8 text-lg leading-relaxed">
-									Nexus is fully containerized. Whether you're running on a Raspberry Pi or a full-blown server rack, 
-									getting started is as simple as cloning and running docker-compose.
+									Nexus is fully containerized with MySQL and ClickHouse for metrics. Whether you're running on a Raspberry Pi or a full-blown server rack, 
+									getting started is as simple as running docker compose.
 								</p>
 								<div class="space-y-4">
 									<div class="flex items-start space-x-3">
@@ -129,7 +129,7 @@ const features = [
 									</div>
 									<div class="flex items-start space-x-3">
 										<div class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
-										<p class="text-sm">Run <code class="bg-muted px-1 rounded">docker-compose up -d</code></p>
+										<p class="text-sm">Run <code class="bg-muted px-1 rounded">make prod</code> or <code class="bg-muted px-1 rounded">docker compose up -d</code></p>
 									</div>
 								</div>
 							</div>
@@ -142,9 +142,9 @@ const features = [
 								<div class="text-zinc-400 space-y-2">
 									<p><span class="text-emerald-400">$</span> git clone https://github.com/kieranholroyd/nexus</p>
 									<p><span class="text-emerald-400">$</span> cd nexus</p>
-									<p><span class="text-emerald-400">$</span> docker-compose up -d</p>
-									<p class="pt-4 text-zinc-500"># Initializing backend...</p>
-									<p class="text-zinc-500"># Building frontend...</p>
+									<p><span class="text-emerald-400">$</span> make prod</p>
+									<p class="pt-4 text-zinc-500"># Starting MySQL & ClickHouse...</p>
+									<p class="text-zinc-500"># Starting Nexus core (Bun)...</p>
 									<p class="text-green-400">✓ Nexus is running at http://localhost:8080</p>
 								</div>
 								<div class="absolute top-0 right-0 p-4">
