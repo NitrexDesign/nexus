@@ -1,84 +1,85 @@
-.PHONY: dev-backend dev-frontend dev help prod up down migrate migrate-generate migrate-studio
+.PHONY: help dev dev-backend dev-frontend build build-backend build-frontend migrate migrate-generate prod down logs lint format
+
+# Project directories
+FRONTEND_DIR := web
+BACKEND_DIR := core
+PROD_COMPOSE_FILE := docker-compose.prod.yml
+
+# Default shell (use bash for trap support)
+SHELL := /bin/bash
 
 help:
-	@echo "Nexus Development Commands:"
-	@echo "  make dev              - Start both backend and frontend in development mode"
-	@echo "  make dev-backend      - Start the TypeScript (Bun) backend"
-	@echo "  make dev-frontend     - Start the React frontend"
-	@echo "  make build-backend    - Build the TypeScript backend"
-	@echo "  make prod             - Start production services using pre-built images"
-	@echo "  make up               - Start production services"
-	@echo "  make down             - Stop production services"
-	@echo ""
-	@echo "Database Migration Commands:"
-	@echo "  make migrate          - Run all pending database migrations (Drizzle)"
-	@echo "  make migrate-generate - Generate new migrations from schema changes"
-	@echo "  make migrate-studio   - Open Drizzle Studio (database GUI)"
-	@echo "                         (Create .env file or set DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME environment variables)"
+	@echo "Makefile commands:"
+	@echo "  dev                - Run backend + frontend for development (Ctrl-C to stop)"
+	@echo "  dev-backend        - Run backend development server (bun)"
+	@echo "  dev-frontend       - Run frontend development server (pnpm)"
+	@echo "  build              - Build backend and frontend for production"
+	@echo "  migrate            - Run database migrations (backend)"
+	@echo "  migrate-generate   - Generate a new migration (backend)"
+	@echo "  prod               - Start production stack via Docker Compose"
+	@echo "  down               - Stop the production stack"
+	@echo "  logs               - Follow production service logs"
+	@echo "  lint               - Run linters (backend & frontend)"
+	@echo "  format             - Run formatters (backend & frontend)"
 
+## Development
 dev-backend:
-	@echo "Starting TypeScript (Bun) backend..."
-	cd core && bun run dev
-
-build-backend:
-	@echo "Building TypeScript backend..."
-	cd core && bun run build
+	@echo "==> Starting backend (in foreground)"
+	@cd $(BACKEND_DIR) && bun run dev
 
 dev-frontend:
-	@echo "Starting React frontend..."
-	cd web && pnpm dev
+	@echo "==> Starting frontend (in foreground)"
+	@cd $(FRONTEND_DIR) && pnpm dev
 
+# Runs both servers in parallel and traps Ctrl-C to stop both
 dev:
-	@echo "Starting Nexus in development mode..."
-	@mkdir -p data
-	@./scripts/dev.sh
+	@echo "Starting backend and frontend (press Ctrl-C to stop)..."
+	@cd $(BACKEND_DIR) && bun run dev & BK_PID=$$!; \
+	cd $(CURDIR)/$(FRONTEND_DIR) && pnpm dev & FG_PID=$$!; \
+	trap 'echo "Stopping servers..."; kill $$BK_PID $$FG_PID 2>/dev/null || true; exit' INT TERM; \
+	wait $$BK_PID $$FG_PID
 
-# Start database containers for local development
-.PHONY: dev-db wait-db dev-with-db
+## Build & Packaging
+build-backend:
+	@echo "==> Building backend"
+	@cd $(BACKEND_DIR) && bun run build
 
-dev-db:
-	@echo "Starting MySQL & ClickHouse containers..."
-	docker compose up -d mysql clickhouse
+build-frontend:
+	@echo "==> Building frontend"
+	@cd $(FRONTEND_DIR) && pnpm build
 
-wait-db:
-	@echo "Waiting for MySQL to become healthy..."
-	@i=0; until docker compose exec mysql mysqladmin ping -h localhost -uroot -proot_password >/dev/null 2>&1 || [ $$i -gt 60 ]; do i=$$((i+1)); sleep 1; echo "waiting for mysql... ($$i)"; done; if [ $$i -gt 60 ]; then echo "MySQL did not become healthy in time"; exit 1; fi
+build: build-backend build-frontend
+	@echo "Build complete"
 
-# Convenience target to start DB and start development servers
-dev-with-db: dev-db wait-db dev
-	@echo "Development environment started (with DB)"
-
-# Create a .env file configured to use a local (host) MySQL installation
-.PHONY: use-host-db check-host-db
-
-check-host-db:
-	@./scripts/check_local_mysql.sh
-
-# Diagnose and attempt fixes for a local MariaDB installation
-.PHONY: fix-local-db
-fix-local-db:
-	@echo "Running MariaDB diagnostic & helper (run with sudo if you want auto-fix actions)"
-	@./scripts/fix_mariadb.sh
-
-prod:
-	@echo "Starting Nexus in production mode..."
-	docker compose -f docker-compose.prod.yml pull
-	docker compose -f docker-compose.prod.yml up -d
-
-up:
-	docker compose -f docker-compose.prod.yml up -d
-
-down:
-	docker compose -f docker-compose.prod.yml down
-
+## Database
 migrate:
-	@echo "Running database migrations (Drizzle)..."
-	@cd core && bun run db:migrate
+	@echo "==> Running migrations"
+	@cd $(BACKEND_DIR) && bun run db:migrate
 
 migrate-generate:
-	@echo "Generating migrations from schema..."
-	@cd core && bun run db:generate
+	@echo "==> Generating migration (opens editor)"
+	@cd $(BACKEND_DIR) && bun run db:generate
 
-migrate-studio:
-	@echo "Opening Drizzle Studio..."
-	@cd core && bun run db:studio
+## Production (Docker Compose)
+prod:
+	@echo "==> Starting production stack (detached)"
+	@docker compose -f $(PROD_COMPOSE_FILE) up -d
+
+down:
+	@echo "==> Bringing down production stack"
+	@docker compose -f $(PROD_COMPOSE_FILE) down
+
+logs:
+	@echo "==> Following logs"
+	@docker compose -f $(PROD_COMPOSE_FILE) logs -f
+
+## Quality
+lint:
+	@echo "==> Running linters"
+	@cd $(BACKEND_DIR) && bun run lint || true
+	@cd $(FRONTEND_DIR) && pnpm lint || true
+
+format:
+	@echo "==> Running formatters"
+	@cd $(BACKEND_DIR) && bun run format || true
+	@cd $(FRONTEND_DIR) && pnpm format || true

@@ -12,11 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiFetch, resolveUrl } from "@/lib/api-client";
-import { useQuery } from "@/tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { UptimeView } from "./UptimeView";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,11 +32,11 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
-  new_tab: boolean;
-  check_health: boolean;
-  health_status?: string;
-  last_checked?: string;
+  authRequired: boolean;
+  newTab: boolean;
+  checkHealth: boolean;
+  healthStatus?: string;
+  lastChecked?: string;
 }
 
 interface PublicDashboardProps {
@@ -77,7 +78,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
         data?.filter((s: Service) => {
           if (!s.public) return false;
           // If secured, only show if logged in
-          if (s.auth_required && !isLoggedIn) return false;
+          if (s.authRequired && !isLoggedIn) return false;
           return true;
         }) || []
       );
@@ -200,7 +201,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                   variants={item}
                   layout
                   onClick={() =>
-                    window.open(s.url, s.new_tab ? "_blank" : "_self")
+                    window.open(s.url, s.newTab ? "_blank" : "_self")
                   }
                   className="block group cursor-pointer"
                 >
@@ -252,7 +253,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                           <h3 className="font-bold text-lg truncate group-hover:text-primary transition-colors">
                             {s.name}
                           </h3>
-                          {s.auth_required && (
+                          {s.authRequired && (
                             <Badge
                               variant="outline"
                               className="text-[10px] h-4 py-0 px-1 border-primary/20 text-primary bg-primary/5"
@@ -271,7 +272,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                           <p className="text-sm text-muted-foreground truncate opacity-70 group-hover:opacity-100 transition-opacity">
                             {s.url.replace(/^https?:\/\//, "")}
                           </p>
-                          {s.check_health && (
+                          {s.checkHealth && (
                             <div
                               onClick={(e) => {
                                 e.preventDefault();
@@ -283,15 +284,15 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                                   <div
                                     className={cn(
                                       "size-3 rounded-full cursor-pointer hover:scale-125 transition-all duration-150 ring-offset-background ring-2 ring-transparent hover:ring-primary/20",
-                                      s.health_status === "online"
+                                      s.healthStatus === "online"
                                         ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
-                                        : s.health_status === "offline"
+                                        : s.healthStatus === "offline"
                                           ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
                                           : "bg-neutral-300 dark:bg-neutral-700",
                                     )}
                                     title={
-                                      s.health_status
-                                        ? `Status: ${s.health_status} (Click for history)`
+                                      s.healthStatus
+                                        ? `Status: ${s.healthStatus} (Click for history)`
                                         : "Status: unknown (Click for history)"
                                     }
                                   />
@@ -357,7 +358,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                         variants={item}
                         layout
                         onClick={() =>
-                          window.open(s.url, s.new_tab ? "_blank" : "_self")
+                          window.open(s.url, s.newTab ? "_blank" : "_self")
                         }
                         className="block group cursor-pointer"
                       >
@@ -412,7 +413,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                                 <h3 className="font-bold text-lg truncate group-hover:text-primary transition-colors">
                                   {s.name}
                                 </h3>
-                                {s.auth_required && (
+                                {s.authRequired && (
                                   <Badge
                                     variant="outline"
                                     className="text-[10px] h-4 py-0 px-1 border-primary/20 text-primary bg-primary/5"
@@ -425,7 +426,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                                 <p className="text-sm text-muted-foreground truncate opacity-70 group-hover:opacity-100 transition-opacity">
                                   {s.url.replace(/^https?:\/\//, "")}
                                 </p>
-                                {s.check_health && (
+                                {s.checkHealth && (
                                   <div
                                     onClick={(e) => {
                                       e.preventDefault();
@@ -437,15 +438,15 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                                         <div
                                           className={cn(
                                             "size-3 rounded-full cursor-pointer hover:scale-125 transition-all duration-150 ring-offset-background ring-2 ring-transparent hover:ring-primary/20",
-                                            s.health_status === "online"
+                                            s.healthStatus === "online"
                                               ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
-                                              : s.health_status === "offline"
+                                              : s.healthStatus === "offline"
                                                 ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
                                                 : "bg-neutral-300 dark:bg-neutral-700",
                                           )}
                                           title={
-                                            s.health_status
-                                              ? `Status: ${s.health_status} (Click for history)`
+                                            s.healthStatus
+                                              ? `Status: ${s.healthStatus} (Click for history)`
                                               : "Status: unknown (Click for history)"
                                           }
                                         />

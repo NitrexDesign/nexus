@@ -60,11 +60,11 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
-  new_tab: boolean;
-  check_health: boolean;
-  health_status?: string;
-  last_checked?: string;
+  authRequired: boolean;
+  newTab: boolean;
+  checkHealth: boolean;
+  healthStatus?: string;
+  lastChecked?: string;
 }
 
 interface User {
@@ -251,11 +251,11 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
           group: (item.group as string) || "",
           order: Number(item.order) || 0,
           public: (item.public as boolean) ?? true,
-          auth_required: (item.auth_required as boolean) ?? false,
-          new_tab: (item.new_tab as boolean) ?? false,
-          check_health: (item.check_health as boolean) ?? true,
-          health_status: (item.health_status as string) || "",
-          last_checked: item.last_checked || null,
+          authRequired: (item.auth_required as boolean) ?? false,
+          newTab: (item.new_tab as boolean) ?? false,
+          checkHealth: (item.check_health as boolean) ?? true,
+          healthStatus: (item.health_status as string) || "",
+          lastChecked: item.last_checked || null,
         }));
 
         const res = await apiFetch("/api/services/bulk", {
@@ -292,7 +292,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
   const stats = {
     total: services.length,
     public: services.filter((s) => s.public).length,
-    auth: services.filter((s) => s.auth_required).length,
+    auth: services.filter((s) => s.authRequired).length,
     groups: groups.length,
   };
 

@@ -18,9 +18,9 @@ interface Service {
   url: string;
   icon: string;
   group: string;
-  check_health: boolean;
-  health_status: string;
-  last_checked: string;
+  checkHealth: boolean;
+  healthStatus: string;
+  lastChecked: string;
 }
 
 interface StatusPageProps {
@@ -78,14 +78,14 @@ const LazyServiceCard = memo(
                 variant="outline"
                 className={cn(
                   "px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2",
-                  service.health_status === "online"
+                  service.healthStatus === "online"
                     ? "bg-green-500/5 text-green-600 border-green-500/20"
-                    : service.health_status === "offline"
+                    : service.healthStatus === "offline"
                       ? "bg-red-500/5 text-red-600 border-red-500/20"
                       : "bg-neutral-500/5 text-neutral-600 border-neutral-500/20",
                 )}
               >
-                {service.health_status || "Unknown"}
+                {service.healthStatus || "Unknown"}
               </Badge>
             </div>
             <p className="text-xs font-mono text-muted-foreground opacity-50 truncate mt-0.5">
@@ -97,7 +97,7 @@ const LazyServiceCard = memo(
               Last Ping
             </span>
             <span className="text-xs font-black italic">
-              {service.last_checked
+              {service.lastChecked
                 ? new Date(service.last_checked).toLocaleTimeString()
                 : "Never"}
             </span>
@@ -201,7 +201,7 @@ export function StatusPage({ search = "" }: StatusPageProps) {
     refetchOnWindowFocus: false,
   });
 
-  const monitoredServices = services?.filter((s) => s.check_health) || [];
+  const monitoredServices = services?.filter((s) => s.checkHealth) || [];
   const filteredServices = useMemo(
     () =>
       monitoredServices.filter(
@@ -230,10 +230,10 @@ export function StatusPage({ search = "" }: StatusPageProps) {
   }
 
   const onlineCount = monitoredServices.filter(
-    (s) => s.health_status === "online",
+    (s) => s.healthStatus === "online",
   ).length;
   const offlineCount = monitoredServices.filter(
-    (s) => s.health_status === "offline",
+    (s) => s.healthStatus === "offline",
   ).length;
 
   return (

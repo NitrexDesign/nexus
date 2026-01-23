@@ -16,7 +16,7 @@ interface Service {
   description: string;
   icon: React.ComponentType<{ size?: number }>;
   status: "online" | "offline";
-  new_tab: boolean;
+  newTab: boolean;
 }
 
 const MOCK_SERVICES: Service[] = [
@@ -27,7 +27,7 @@ const MOCK_SERVICES: Service[] = [
     description: "Media Server",
     icon: Server,
     status: "online",
-    new_tab: true,
+    newTab: true,
   },
   {
     id: "2",
@@ -36,7 +36,7 @@ const MOCK_SERVICES: Service[] = [
     description: "Smart Home",
     icon: Settings,
     status: "online",
-    new_tab: true,
+    newTab: true,
   },
   {
     id: "3",
@@ -45,7 +45,7 @@ const MOCK_SERVICES: Service[] = [
     description: "Network Ad-blocker",
     icon: Server,
     status: "online",
-    new_tab: true,
+    newTab: true,
   },
   {
     id: "4",
@@ -54,7 +54,7 @@ const MOCK_SERVICES: Service[] = [
     description: "File Storage",
     icon: ExternalLink,
     status: "offline",
-    new_tab: true,
+    newTab: true,
   },
 ];
 
@@ -116,7 +116,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
           {filteredServices.map((service) => (
             <a
               href={service.url}
-              target={service.new_tab ? "_blank" : "_self"}
+              target={service.newTab ? "_blank" : "_self"}
               rel="noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
