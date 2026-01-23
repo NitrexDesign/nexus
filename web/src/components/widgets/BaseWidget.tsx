@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Settings, X, GripVertical } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { WidgetProps, WidgetDefinition } from '@/lib/widgets/types';
-import { useWidgets, widgetRegistry } from '@/lib/widgets';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Settings, X, GripVertical } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { WidgetProps, WidgetDefinition } from "@/lib/widgets/types";
+import { useWidgets, widgetRegistry } from "@/lib/widgets";
 
 interface BaseWidgetProps extends WidgetProps {
   title: string;
@@ -50,7 +56,7 @@ export function BaseWidget({
         "relative transition-all duration-200 hover:shadow-md h-full flex flex-col",
         isEditing && "ring-2 ring-primary/50",
         !config.enabled && "opacity-50",
-        className
+        className,
       )}
     >
       <CardHeader className="pb-2 flex-shrink-0">

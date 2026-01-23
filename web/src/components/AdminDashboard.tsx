@@ -111,7 +111,11 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
     },
   });
 
-  const { data: users = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery<User[]>({
+  const {
+    data: users = [],
+    isLoading: usersLoading,
+    refetch: refetchUsers,
+  } = useQuery<User[]>({
     queryKey: ["users"],
     queryFn: async () => {
       const res = await apiFetch("/api/users");
@@ -122,7 +126,13 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async ({ id, data }: { id?: string; data: Partial<Service> }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id?: string;
+      data: Partial<Service>;
+    }) => {
       const method = id ? "PUT" : "POST";
       const url = id ? `/api/services/${id}` : "/api/services";
       const res = await apiFetch(url, {
@@ -134,7 +144,9 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
       return res.json();
     },
     onSuccess: () => {
-      toast.success(editing && editing !== "new" ? "Service updated" : "Service created");
+      toast.success(
+        editing && editing !== "new" ? "Service updated" : "Service created",
+      );
       queryClient.invalidateQueries({ queryKey: ["services"] });
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       setEditing(null);
@@ -156,7 +168,9 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      await Promise.all(ids.map(id => apiFetch(`/api/services/${id}`, { method: "DELETE" })));
+      await Promise.all(
+        ids.map((id) => apiFetch(`/api/services/${id}`, { method: "DELETE" })),
+      );
     },
     onSuccess: () => {
       toast.success("Services deleted");
@@ -232,15 +246,15 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
         if (!Array.isArray(rawData)) throw new Error("Invalid format");
 
         const data = rawData.map((item: Record<string, unknown>) => ({
-          name: item.name as string || "",
-          url: item.url as string || "",
-          group: item.group as string || "",
+          name: (item.name as string) || "",
+          url: (item.url as string) || "",
+          group: (item.group as string) || "",
           order: Number(item.order) || 0,
-          public: item.public as boolean ?? true,
-          auth_required: item.auth_required as boolean ?? false,
-          new_tab: item.new_tab as boolean ?? false,
-          check_health: item.check_health as boolean ?? true,
-          health_status: item.health_status as string || "",
+          public: (item.public as boolean) ?? true,
+          auth_required: (item.auth_required as boolean) ?? false,
+          new_tab: (item.new_tab as boolean) ?? false,
+          check_health: (item.check_health as boolean) ?? true,
+          health_status: (item.health_status as string) || "",
           last_checked: item.last_checked || null,
         }));
 
@@ -326,7 +340,10 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                <TabsContent value="services" className="space-y-8 outline-none mt-0">
+                <TabsContent
+                  value="services"
+                  className="space-y-8 outline-none mt-0"
+                >
                   <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between bg-card p-6 rounded-2xl border shadow-sm">
                     <div className="flex flex-wrap gap-3 items-center">
                       <TooltipProvider>
@@ -338,7 +355,11 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                               onClick={() => setShowStats(!showStats)}
                               className="rounded-xl"
                             >
-                              {showStats ? <EyeOff size={18} /> : <Eye size={18} />}
+                              {showStats ? (
+                                <EyeOff size={18} />
+                              ) : (
+                                <Eye size={18} />
+                              )}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -356,7 +377,10 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                             <FileJson size={18} />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="rounded-xl">
+                        <DropdownMenuContent
+                          align="start"
+                          className="rounded-xl"
+                        >
                           <DropdownMenuItem
                             onClick={handleExport}
                             className="cursor-pointer"
@@ -399,7 +423,9 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                           >
                             <div className="flex items-center">
                               <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
-                              {filterGroup === "all" ? "All Groups" : filterGroup}
+                              {filterGroup === "all"
+                                ? "All Groups"
+                                : filterGroup}
                             </div>
                             <Check
                               className={cn(
@@ -488,7 +514,11 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                     {selectedIds.size > 0 && (
                       <motion.div
                         initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        animate={{ opacity: 1, height: "auto", marginBottom: 32 }}
+                        animate={{
+                          opacity: 1,
+                          height: "auto",
+                          marginBottom: 32,
+                        }}
                         exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                         className="bg-destructive/10 text-destructive border border-destructive/20 p-4 rounded-2xl flex items-center justify-between overflow-hidden"
                       >
@@ -532,10 +562,12 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                   ) : filteredServices.length === 0 ? (
                     <div className="text-center py-32 border-2 border-dashed rounded-3xl bg-card/50">
                       <Search className="mx-auto h-20 w-20 text-muted-foreground mb-6 opacity-10" />
-                      <h3 className="text-2xl font-black mb-2">No results found</h3>
+                      <h3 className="text-2xl font-black mb-2">
+                        No results found
+                      </h3>
                       <p className="text-muted-foreground text-lg max-w-md mx-auto">
-                        We couldn't find any services matching your current filters or
-                        search query.
+                        We couldn't find any services matching your current
+                        filters or search query.
                       </p>
                       <Button
                         variant="link"
@@ -602,7 +634,9 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                 <TabsContent value="users" className="outline-none mt-0">
                   <div className="space-y-6">
                     <div className="bg-card p-6 rounded-2xl border shadow-sm mb-6">
-                      <h2 className="text-2xl font-black mb-1">User Management</h2>
+                      <h2 className="text-2xl font-black mb-1">
+                        User Management
+                      </h2>
                       <p className="text-muted-foreground">
                         Approve or remove access for users on your instance.
                       </p>
@@ -632,4 +666,3 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
     </div>
   );
 }
-

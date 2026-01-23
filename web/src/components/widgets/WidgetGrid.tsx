@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { widgetRegistry } from '@/lib/widgets/registry';
-import { useWidgets } from '@/lib/widgets/context';
-import { WidgetConfig } from '@/lib/widgets/types';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { Move, Maximize2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { widgetRegistry } from "@/lib/widgets/registry";
+import { useWidgets } from "@/lib/widgets/context";
+import { WidgetConfig } from "@/lib/widgets/types";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { Move, Maximize2 } from "lucide-react";
 
 interface WidgetGridProps {
   className?: string;
@@ -16,21 +16,35 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   const { widgets, isEditing, updateWidget, gridSettings } = useWidgets();
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);
   const [resizingWidgetId, setResizingWidgetId] = useState<string | null>(null);
-  const [hoveredCell, setHoveredCell] = useState<{col: number, row: number} | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<{
+    col: number;
+    row: number;
+  } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
 
   const { cols: GRID_COLS, rows: GRID_ROWS } = gridSettings;
 
-  const enabledWidgets = widgets.filter(w => w.enabled);
+  const enabledWidgets = widgets.filter((w) => w.enabled);
 
   // Check if a position is occupied by any widget
-  const isPositionOccupied = (col: number, row: number, width: number, height: number, excludeId?: string) => {
-    if (col < 0 || row < 0 || col + width > GRID_COLS || row + height > GRID_ROWS) {
+  const isPositionOccupied = (
+    col: number,
+    row: number,
+    width: number,
+    height: number,
+    excludeId?: string,
+  ) => {
+    if (
+      col < 0 ||
+      row < 0 ||
+      col + width > GRID_COLS ||
+      row + height > GRID_ROWS
+    ) {
       return true;
     }
 
-    return enabledWidgets.some(widget => {
+    return enabledWidgets.some((widget) => {
       if (excludeId && widget.id === excludeId) return false;
       const { x, y, width: wWidth, height: wHeight } = widget.position;
       const overlapX = !(col + width <= x || col >= x + wWidth);
@@ -39,14 +53,21 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     });
   };
 
-  const getCellFromEvent = (e: React.DragEvent | React.TouchEvent | React.MouseEvent | MouseEvent | TouchEvent) => {
+  const getCellFromEvent = (
+    e:
+      | React.DragEvent
+      | React.TouchEvent
+      | React.MouseEvent
+      | MouseEvent
+      | TouchEvent,
+  ) => {
     if (!gridRef.current) return null;
 
     const rect = gridRef.current.getBoundingClientRect();
     let clientX, clientY;
 
-    if ('touches' in e) {
-      const touch = e.type === 'touchend' ? e.changedTouches[0] : e.touches[0];
+    if ("touches" in e) {
+      const touch = e.type === "touchend" ? e.changedTouches[0] : e.touches[0];
       clientX = touch?.clientX;
       clientY = touch?.clientY;
     } else {
@@ -64,7 +85,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
     return {
       col: Math.max(0, Math.min(col, GRID_COLS - 1)),
-      row: Math.max(0, Math.min(row, GRID_ROWS - 1))
+      row: Math.max(0, Math.min(row, GRID_ROWS - 1)),
     };
   };
 
@@ -72,8 +93,8 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     if (resizingWidgetId) return; // Don't drag if resizing
     setDraggedWidgetId(widget.id);
     setIsDragging(true);
-    e.dataTransfer.setData('text/plain', widget.id);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData("text/plain", widget.id);
+    e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragEnd = () => {
@@ -84,11 +105,15 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
 
     const cell = getCellFromEvent(e);
     if (cell) {
-      if (!hoveredCell || hoveredCell.col !== cell.col || hoveredCell.row !== cell.row) {
+      if (
+        !hoveredCell ||
+        hoveredCell.col !== cell.col ||
+        hoveredCell.row !== cell.row
+      ) {
         setHoveredCell(cell);
       }
     }
@@ -97,22 +122,30 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const cell = getCellFromEvent(e);
-    const widgetId = e.dataTransfer.getData('text/plain') || draggedWidgetId;
+    const widgetId = e.dataTransfer.getData("text/plain") || draggedWidgetId;
 
     if (cell && widgetId) {
-      const widget = widgets.find(w => w.id === widgetId);
+      const widget = widgets.find((w) => w.id === widgetId);
       if (widget) {
-        if (!isPositionOccupied(cell.col, cell.row, widget.position.width, widget.position.height, widget.id)) {
+        if (
+          !isPositionOccupied(
+            cell.col,
+            cell.row,
+            widget.position.width,
+            widget.position.height,
+            widget.id,
+          )
+        ) {
           try {
             await updateWidget(widgetId, {
               position: { ...widget.position, x: cell.col, y: cell.row },
             });
-            toast.success('Widget moved');
+            toast.success("Widget moved");
           } catch (error) {
-            toast.error('Failed to move widget');
+            toast.error("Failed to move widget");
           }
         } else {
-          toast.error('Position occupied');
+          toast.error("Position occupied");
         }
       }
     }
@@ -121,7 +154,10 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   };
 
   // Resize logic
-  const handleResizeStart = (e: React.MouseEvent | React.TouchEvent, widgetId: string) => {
+  const handleResizeStart = (
+    e: React.MouseEvent | React.TouchEvent,
+    widgetId: string,
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     setResizingWidgetId(widgetId);
@@ -132,14 +168,14 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
     const handleMouseMove = (e: MouseEvent | TouchEvent) => {
       if (!gridRef.current) return;
-      
-      const widget = widgets.find(w => w.id === resizingWidgetId);
+
+      const widget = widgets.find((w) => w.id === resizingWidgetId);
       if (!widget) return;
 
       const rect = gridRef.current.getBoundingClientRect();
       let clientX, clientY;
 
-      if ('touches' in e) {
+      if ("touches" in e) {
         const touch = e.touches[0];
         if (!touch) return;
         clientX = touch.clientX;
@@ -161,13 +197,40 @@ export function WidgetGrid({ className }: WidgetGridProps) {
       const minHeight = widgetDefinition?.minSize?.height || 1;
 
       // Calculate new size based on cell position
-      const newWidth = Math.max(minWidth, Math.min(cellCol - widget.position.x + 1, GRID_COLS - widget.position.x));
-      const newHeight = Math.max(minHeight, Math.min(cellRow - widget.position.y + 1, GRID_ROWS - widget.position.y));
+      const newWidth = Math.max(
+        minWidth,
+        Math.min(
+          cellCol - widget.position.x + 1,
+          GRID_COLS - widget.position.x,
+        ),
+      );
+      const newHeight = Math.max(
+        minHeight,
+        Math.min(
+          cellRow - widget.position.y + 1,
+          GRID_ROWS - widget.position.y,
+        ),
+      );
 
-      if (newWidth !== widget.position.width || newHeight !== widget.position.height) {
-        if (!isPositionOccupied(widget.position.x, widget.position.y, newWidth, newHeight, widget.id)) {
+      if (
+        newWidth !== widget.position.width ||
+        newHeight !== widget.position.height
+      ) {
+        if (
+          !isPositionOccupied(
+            widget.position.x,
+            widget.position.y,
+            newWidth,
+            newHeight,
+            widget.id,
+          )
+        ) {
           updateWidget(resizingWidgetId, {
-            position: { ...widget.position, width: newWidth, height: newHeight }
+            position: {
+              ...widget.position,
+              width: newWidth,
+              height: newHeight,
+            },
           });
         }
       }
@@ -175,19 +238,19 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
     const handleMouseUp = () => {
       setResizingWidgetId(null);
-      toast.success('Widget resized');
+      toast.success("Widget resized");
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('touchmove', handleMouseMove);
-    window.addEventListener('touchend', handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchmove", handleMouseMove);
+    window.addEventListener("touchend", handleMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleMouseMove);
-      window.removeEventListener('touchend', handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleMouseMove);
+      window.removeEventListener("touchend", handleMouseUp);
     };
   }, [resizingWidgetId, widgets, updateWidget, GRID_COLS, GRID_ROWS]);
 
@@ -208,7 +271,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
           "flex flex-col overflow-hidden",
           isEditing && "hover:ring-2 hover:ring-primary/20",
           isBeingDragged && "opacity-20 grayscale scale-95",
-          isBeingResized && "ring-2 ring-primary z-30 shadow-2xl scale-[1.02]"
+          isBeingResized && "ring-2 ring-primary z-30 shadow-2xl scale-[1.02]",
         )}
         style={{
           gridColumn: `${x + 1} / span ${width}`,
@@ -256,7 +319,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
           <div
             key={`${col}-${row}`}
             className="border border-dashed border-muted-foreground/10 rounded-xl"
-          />
+          />,
         );
       }
     }
@@ -266,17 +329,25 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   const renderDragPreview = () => {
     if (!isEditing || !draggedWidgetId || !hoveredCell) return null;
 
-    const draggedWidgetConfig = widgets.find(w => w.id === draggedWidgetId);
+    const draggedWidgetConfig = widgets.find((w) => w.id === draggedWidgetId);
     if (!draggedWidgetConfig) return null;
 
     const { width, height } = draggedWidgetConfig.position;
-    const canDrop = !isPositionOccupied(hoveredCell.col, hoveredCell.row, width, height, draggedWidgetId);
+    const canDrop = !isPositionOccupied(
+      hoveredCell.col,
+      hoveredCell.row,
+      width,
+      height,
+      draggedWidgetId,
+    );
 
     return (
       <div
         className={cn(
           "absolute pointer-events-none border-2 rounded-2xl transition-all duration-75 z-20",
-          canDrop ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "border-destructive bg-destructive/10"
+          canDrop
+            ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+            : "border-destructive bg-destructive/10",
         )}
         style={{
           gridColumn: `${hoveredCell.col + 1} / span ${width}`,
@@ -294,8 +365,9 @@ export function WidgetGrid({ className }: WidgetGridProps) {
       ref={gridRef}
       className={cn(
         "relative w-full transition-all duration-300 p-4",
-        isEditing && "rounded-[2rem] bg-muted/20 ring-1 ring-border shadow-inner",
-        className
+        isEditing &&
+          "rounded-[2rem] bg-muted/20 ring-1 ring-border shadow-inner",
+        className,
       )}
       style={{ minHeight: `${minHeight}px` }}
       onDragOver={isEditing ? handleDragOver : undefined}
@@ -310,7 +382,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
       >
         {/* Background Grid Cells */}
         {isEditing && (
-          <div 
+          <div
             className="absolute inset-0 grid gap-4 pointer-events-none opacity-30"
             style={{
               gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
