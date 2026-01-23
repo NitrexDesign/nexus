@@ -193,7 +193,7 @@ export function StatusPage({ search = "" }: StatusPageProps) {
   >({
     queryKey: ["uptime-bulk"],
     queryFn: async () => {
-      const res = await apiFetch("/api/uptime/bulk");
+      const res = await apiFetch("/api/services/uptime");
       return res.json();
     },
     staleTime: 300000,

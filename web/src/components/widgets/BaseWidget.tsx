@@ -47,13 +47,13 @@ export function BaseWidget({
   return (
     <Card
       className={cn(
-        "relative transition-all duration-200 hover:shadow-md",
+        "relative transition-all duration-200 hover:shadow-md h-full flex flex-col",
         isEditing && "ring-2 ring-primary/50",
         !config.enabled && "opacity-50",
         className
       )}
     >
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {isEditing && (
@@ -84,7 +84,7 @@ export function BaseWidget({
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 flex-1 overflow-auto">
         {children}
       </CardContent>
 

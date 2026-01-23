@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { WidgetConfig, WidgetContextType } from './types';
 import { widgetRegistry } from './registry';
 import { toast } from 'sonner';
+import { apiFetch } from '../api-client';
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
@@ -14,41 +15,47 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [];
 // Backend API types
 interface BackendWidgetConfig {
   id: string;
-  widget_type: string;
-  position: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
+  widgetType: string;
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
   settings: Record<string, any>;
   enabled: boolean;
-  sort_order: number;
-  created_at?: string;
-  updated_at?: string;
+  sortOrder: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Convert backend WidgetConfig to frontend WidgetConfig
 function backendToFrontend(config: BackendWidgetConfig): WidgetConfig {
   return {
     id: config.id,
-    type: config.widget_type,
-    position: config.position,
+    type: config.widgetType,
+    position: {
+      x: config.positionX,
+      y: config.positionY,
+      width: config.width,
+      height: config.height,
+    },
     settings: config.settings,
     enabled: config.enabled,
-    order: config.sort_order,
+    order: config.sortOrder,
   };
 }
 
 // Convert frontend WidgetConfig to backend WidgetConfig
-function frontendToBackend(config: WidgetConfig): Omit<BackendWidgetConfig, 'created_at' | 'updated_at'> {
+function frontendToBackend(config: WidgetConfig): Omit<BackendWidgetConfig, 'createdAt' | 'updatedAt'> {
   return {
     id: config.id,
-    widget_type: config.type,
-    position: config.position,
+    widgetType: config.type,
+    positionX: config.position.x,
+    positionY: config.position.y,
+    width: config.position.width,
+    height: config.position.height,
     settings: config.settings,
     enabled: config.enabled,
-    sort_order: config.order,
+    sortOrder: config.order,
   };
 }
 
@@ -63,7 +70,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadWidgets = async () => {
       try {
-        const res = await fetch('/api/widgets/configs');
+        const res = await apiFetch('/api/widgets');
         if (res.ok) {
           const configs: BackendWidgetConfig[] = await res.json();
           const frontendWidgets = configs.map(backendToFrontend);
@@ -86,14 +93,14 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
     const loadSettings = async () => {
       try {
-        const res = await fetch('/api/widgets/settings');
+        const res = await apiFetch('/api/widgets/settings');
         if (res.ok) {
           const data = await res.json();
           setGridSettings({
-            cols: data.grid_cols || 4,
-            rows: data.grid_rows || 6,
+            cols: data.gridCols || 4,
+            rows: data.gridRows || 6,
           });
-          setCategoryOrder(data.category_order || []);
+          setCategoryOrder(data.categoryOrder || []);
         }
       } catch (error) {
         console.error('Failed to load widget settings:', error);
@@ -108,13 +115,13 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   const updateGridSettings = async (cols: number, rows: number) => {
     try {
-      const res = await fetch('/api/widgets/settings', {
+      const res = await apiFetch('/api/widgets/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          grid_cols: cols,
-          grid_rows: rows,
-          category_order: categoryOrder,
+          gridCols: cols,
+          gridRows: rows,
+          categoryOrder: categoryOrder,
         }),
       });
 
@@ -149,7 +156,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     };
 
     try {
-      const res = await fetch('/api/widgets/configs', {
+      const res = await apiFetch('/api/widgets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +181,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   const removeWidget = async (id: string) => {
     try {
-      const res = await fetch(`/api/widgets/configs/${id}`, {
+      const res = await apiFetch(`/api/widgets/${id}`, {
         method: 'DELETE',
       });
 
@@ -198,7 +205,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     const updatedWidget = { ...currentWidget, ...updates };
 
     try {
-      const res = await fetch(`/api/widgets/configs/${id}`, {
+      const res = await apiFetch(`/api/widgets/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -229,7 +236,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     const updatedWidget = { ...currentWidget, enabled: !currentWidget.enabled };
 
     try {
-      const res = await fetch(`/api/widgets/configs/${id}`, {
+      const res = await apiFetch(`/api/widgets/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -253,12 +260,12 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   const reorderCategories = async (newOrder: string[]) => {
     try {
-      const res = await fetch('/api/widgets/category-order', {
+      const res = await apiFetch('/api/widgets/settings/category-order', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ category_order: newOrder }),
+        body: JSON.stringify(newOrder),
       });
 
       if (res.ok) {

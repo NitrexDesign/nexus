@@ -105,7 +105,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
   const { data: groups = [] } = useQuery<string[]>({
     queryKey: ["groups"],
     queryFn: async () => {
-      const res = await apiFetch("/api/groups");
+      const res = await apiFetch("/api/services/groups");
       const data = await res.json();
       return data || [];
     },

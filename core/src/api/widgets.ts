@@ -45,9 +45,9 @@ export async function updateWidgetSettings(c: Context) {
       const _result = await db
         .update(widgetSettings)
         .set({
-          categoryOrder: body.category_order,
-          gridCols: body.grid_cols,
-          gridRows: body.grid_rows,
+          categoryOrder: body.categoryOrder,
+          gridCols: body.gridCols,
+          gridRows: body.gridRows,
           updatedAt: new Date(),
         })
         .where(eq(widgetSettings.id, "default"));
@@ -58,9 +58,9 @@ export async function updateWidgetSettings(c: Context) {
       try {
         await db.insert(widgetSettings).values({
           id: "default",
-          categoryOrder: body.category_order,
-          gridCols: body.grid_cols,
-          gridRows: body.grid_rows,
+          categoryOrder: body.categoryOrder,
+          gridCols: body.gridCols,
+          gridRows: body.gridRows,
           updatedAt: new Date(),
         });
       } catch {
@@ -134,14 +134,14 @@ export async function createWidgetConfig(c: Context) {
 
     const newConfig: typeof widgetConfigs.$inferInsert = {
       id: body.id || generateId(),
-      widgetType: body.widget_type,
-      positionX: body.position.x,
-      positionY: body.position.y,
-      width: body.position.width,
-      height: body.position.height,
+      widgetType: body.widgetType,
+      positionX: body.positionX,
+      positionY: body.positionY,
+      width: body.width,
+      height: body.height,
       settings: body.settings || {},
       enabled: body.enabled ?? true,
-      sortOrder: body.sort_order ?? 0,
+      sortOrder: body.sortOrder ?? 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -194,14 +194,14 @@ export async function updateWidgetConfig(c: Context) {
       const _updated = await db
         .update(widgetConfigs)
         .set({
-          widgetType: body.widget_type,
-          positionX: body.position.x,
-          positionY: body.position.y,
-          width: body.position.width,
-          height: body.position.height,
+          widgetType: body.widgetType,
+          positionX: body.positionX,
+          positionY: body.positionY,
+          width: body.width,
+          height: body.height,
           settings: body.settings,
           enabled: body.enabled,
-          sortOrder: body.sort_order,
+          sortOrder: body.sortOrder,
           updatedAt: new Date(),
         })
         .where(eq(widgetConfigs.id, id));
@@ -211,14 +211,14 @@ export async function updateWidgetConfig(c: Context) {
       try {
         await db.insert(widgetConfigs).values({
           id,
-          widgetType: body.widget_type,
-          positionX: body.position.x,
-          positionY: body.position.y,
-          width: body.position.width,
-          height: body.position.height,
+          widgetType: body.widgetType,
+          positionX: body.positionX,
+          positionY: body.positionY,
+          width: body.width,
+          height: body.height,
           settings: body.settings || {},
           enabled: body.enabled ?? true,
-          sortOrder: body.sort_order ?? 0,
+          sortOrder: body.sortOrder ?? 0,
           createdAt: new Date(),
           updatedAt: new Date(),
         });

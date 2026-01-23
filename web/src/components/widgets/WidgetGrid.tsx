@@ -122,6 +122,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
   // Resize logic
   const handleResizeStart = (e: React.MouseEvent | React.TouchEvent, widgetId: string) => {
+    e.preventDefault();
     e.stopPropagation();
     setResizingWidgetId(widgetId);
   };
@@ -130,18 +131,38 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     if (!resizingWidgetId) return;
 
     const handleMouseMove = (e: MouseEvent | TouchEvent) => {
-      const cell = getCellFromEvent(e);
-      if (!cell) return;
-
+      if (!gridRef.current) return;
+      
       const widget = widgets.find(w => w.id === resizingWidgetId);
       if (!widget) return;
+
+      const rect = gridRef.current.getBoundingClientRect();
+      let clientX, clientY;
+
+      if ('touches' in e) {
+        const touch = e.touches[0];
+        if (!touch) return;
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Calculate which cell the mouse is over
+      const cellCol = Math.floor((x / rect.width) * GRID_COLS);
+      const cellRow = Math.floor((y / rect.height) * GRID_ROWS);
 
       const widgetDefinition = widgetRegistry.get(widget.type);
       const minWidth = widgetDefinition?.minSize?.width || 1;
       const minHeight = widgetDefinition?.minSize?.height || 1;
 
-      const newWidth = Math.max(minWidth, cell.col - widget.position.x + 1);
-      const newHeight = Math.max(minHeight, cell.row - widget.position.y + 1);
+      // Calculate new size based on cell position
+      const newWidth = Math.max(minWidth, Math.min(cellCol - widget.position.x + 1, GRID_COLS - widget.position.x));
+      const newHeight = Math.max(minHeight, Math.min(cellRow - widget.position.y + 1, GRID_ROWS - widget.position.y));
 
       if (newWidth !== widget.position.width || newHeight !== widget.position.height) {
         if (!isPositionOccupied(widget.position.x, widget.position.y, newWidth, newHeight, widget.id)) {
@@ -154,6 +175,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
     const handleMouseUp = () => {
       setResizingWidgetId(null);
+      toast.success('Widget resized');
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -183,6 +205,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
         key={widget.id}
         className={cn(
           "transition-all duration-200 z-10 relative group",
+          "flex flex-col overflow-hidden",
           isEditing && "hover:ring-2 hover:ring-primary/20",
           isBeingDragged && "opacity-20 grayscale scale-95",
           isBeingResized && "ring-2 ring-primary z-30 shadow-2xl scale-[1.02]"
@@ -211,9 +234,10 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
         {isEditing && (
           <div
-            className="absolute bottom-0 right-0 size-8 cursor-nwse-resize z-30 flex items-end justify-end p-1 hover:scale-125 transition-transform"
+            className="absolute bottom-0 right-0 size-8 cursor-nwse-resize z-30 flex items-end justify-end p-1 hover:scale-125 transition-transform pointer-events-auto"
             onMouseDown={(e) => handleResizeStart(e, widget.id)}
             onTouchStart={(e) => handleResizeStart(e, widget.id)}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="size-4 bg-primary rounded-tl-lg rounded-br-lg shadow-sm flex items-center justify-center">
               <Maximize2 className="size-2.5 text-primary-foreground rotate-90" />
@@ -263,13 +287,13 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   };
 
   const rowHeight = 120;
-  const minHeight = GRID_ROWS * rowHeight;
+  const minHeight = GRID_ROWS * rowHeight + (GRID_ROWS - 1) * 16; // Add gap spacing
 
   return (
     <div
       ref={gridRef}
       className={cn(
-        "relative w-full transition-all duration-300 p-3",
+        "relative w-full transition-all duration-300 p-4",
         isEditing && "rounded-[2rem] bg-muted/20 ring-1 ring-border shadow-inner",
         className
       )}
@@ -280,18 +304,17 @@ export function WidgetGrid({ className }: WidgetGridProps) {
       <div
         className="grid w-full h-full gap-4 relative"
         style={{
-          gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-          gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
-          minHeight: `${minHeight}px`,
+          gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${GRID_ROWS}, ${rowHeight}px)`,
         }}
       >
         {/* Background Grid Cells */}
         {isEditing && (
           <div 
-            className="absolute inset-0 grid gap-4 pointer-events-none opacity-50"
+            className="absolute inset-0 grid gap-4 pointer-events-none opacity-30"
             style={{
-              gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-              gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
+              gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${GRID_ROWS}, ${rowHeight}px)`,
             }}
           >
             {renderGridCells()}
