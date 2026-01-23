@@ -1,180 +1,322 @@
 ---
-import '../styles/global.css';
-import AnimatedCard from '../components/AnimatedCard';
+import "../styles/global.css";
+import AnimatedCard from "../components/AnimatedCard";
+import {
+  Zap,
+  Fingerprint,
+  Palette,
+  LayoutDashboard,
+  ShieldCheck,
+  Container,
+} from "lucide-react";
 
 const features = [
   {
     title: "High Performance",
-    description: "Built with TypeScript (Bun) and Next.js for blazing-fast response times and modern DX.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap"><path d="M4 14.5L12 3v9h8L12 21v-9H4z"/></svg>`
+    description:
+      "Built with TypeScript (Bun) and Next.js for blazing-fast response times and modern DX.",
+    icon: Zap,
   },
   {
     title: "Passkey Security",
-    description: "Next-gen authentication with WebAuthn support. No more passwords to remember.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fingerprint"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.02-.3 3"/><path d="M14 13.12c0-2.27-1.79-4.12-4-4.12s-4 1.85-4 4.12c0 2.1-.1 4.1-.3 6.1"/><path d="M18 11.12c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 3.33-.1 6.33-.3 9.33"/><path d="M22 10.12a10 10 0 0 0-20 0c0 4.54-.1 8.54-.3 12.54"/><path d="M8 12a2 2 0 0 0 4 0c0-1.02.1-2.02.3-3"/><path d="M6 13.12c0 2.27 1.79 4.12 4 4.12s4-1.85 4-4.12c0-2.1.1-4.1.3-6.1"/></svg>`
+    description:
+      "Next-gen authentication with WebAuthn support. No more passwords to remember.",
+    icon: Fingerprint,
   },
   {
     title: "Modern UI/UX",
-    description: "Beautifully crafted interface using shadcn/ui, Tailwind CSS, and Framer Motion.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.707-.484 2.103-1.206.35-.64.303-1.425-.103-2.024-.444-.654-.702-1.441-.702-2.285 0-1.928 1.562-3.485 3.485-3.485.844 0 1.631.258 2.285.702.599.406 1.385.453 2.024.103.722-.396 1.206-1.177 1.206-2.103C22 6.5 17.5 2 12 2Z"/></svg>`
+    description:
+      "Beautifully crafted interface using shadcn/ui, Tailwind CSS, and Framer Motion.",
+    icon: Palette,
   },
   {
     title: "Service Aggregator",
-    description: "One dashboard for all your self-hosted apps. Health checks and status monitoring built-in.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>`
+    description:
+      "One dashboard for all your self-hosted apps. Health checks and status monitoring built-in.",
+    icon: LayoutDashboard,
   },
   {
     title: "Admin Control",
-    description: "Robust user management with approval workflows and granular permission controls.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>`
+    description:
+      "Robust user management with approval workflows and granular permission controls.",
+    icon: ShieldCheck,
   },
   {
     title: "Cloud Native",
-    description: "Docker-first approach. Deploy anywhere with ease using our pre-built images.",
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-container"><path d="M22 7.7L12 12.3 2 7.7 12 3.1z"/><path d="M2 12.3l10 4.6 10-4.6"/><path d="M2 16.9l10 4.6 10-4.6"/><path d="M2 7.7v9.2"/><path d="M12 12.3v9.2"/><path d="M22 7.7v9.2"/></svg>`
-  }
+    description:
+      "Docker-first approach. Deploy anywhere with ease using our pre-built images.",
+    icon: Container,
+  },
 ];
 ---
 
 <html lang="en" class="scroll-smooth">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="/nexus.ico" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Nexus - The Modern Homelab Dashboard</title>
-		<meta name="description" content="A blazingly fast, modern homelab dashboard and service aggregator built for efficiency and security." />
-	</head>
-	<body class="bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
-		<nav class="fixed top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
-			<div class="container mx-auto px-4 h-16 flex items-center justify-between">
-				<div class="flex items-center space-x-2">
-					<img src="/nexus.png" alt="Nexus Logo" class="w-8 h-8">
-					<span class="text-xl font-bold tracking-tight">Nexus</span>
-				</div>
-				<div class="hidden md:flex items-center space-x-8 text-sm font-medium">
-					<a href="#features" class="hover:text-primary transition-colors">Features</a>
-					<a href="#quick-start" class="hover:text-primary transition-colors">Quick Start</a>
-					<a href="https://github.com/kieranholroyd/nexus" class="bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-90 transition-opacity">GitHub</a>
-				</div>
-			</div>
-		</nav>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/nexus.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Nexus - The Modern Homelab Dashboard</title>
+    <meta
+      name="description"
+      content="A blazingly fast, modern homelab dashboard and service aggregator built for efficiency and security."
+    />
+  </head>
+  <body
+    class="bg-background text-foreground selection:bg-primary selection:text-primary-foreground"
+  >
+    <nav
+      class="fixed top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md"
+    >
+      <div
+        class="container mx-auto px-4 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-2">
+          <img src="/nexus.png" alt="Nexus Logo" class="w-8 h-8" />
+          <span class="text-xl font-bold tracking-tight">Nexus</span>
+        </div>
+        <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+          <a href="#features" class="hover:text-primary transition-colors"
+            >Features</a
+          >
+          <a href="#quick-start" class="hover:text-primary transition-colors"
+            >Quick Start</a
+          >
+          <a
+            href="https://github.com/kieranholroyd/nexus"
+            class="bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
+            >GitHub</a
+          >
+        </div>
+      </div>
+    </nav>
 
-		<main>
-			{/* Hero Section */}
-			<section class="pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-				<div class="container mx-auto px-4 relative">
-					<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/5 rounded-full blur-3xl -z-10"></div>
-					<div class="max-w-3xl mx-auto text-center">
-						<div class="inline-flex items-center space-x-2 bg-muted px-3 py-1 rounded-full text-xs font-medium mb-6 animate-fade-in">
-							<span class="relative flex h-2 w-2">
-								<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-								<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-							</span>
-							<span>Now in Public Alpha</span>
-						</div>
-						<h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
-							The dashboard your <span class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">homelab</span> deserves.
-						</h1>
-						<p class="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-							Nexus is a modern service aggregator built with TypeScript and Next.js. 
-							Secure by default with Passkey support, designed for speed and simplicity.
-						</p>
-						<div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-							<a href="#quick-start" class="w-full sm:w-auto bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
-								Get Started
-							</a>
-							<a href="https://github.com/kieranholroyd/nexus" class="w-full sm:w-auto bg-secondary text-secondary-foreground px-8 py-4 rounded-xl font-semibold border border-border hover:bg-secondary/80 transition-colors">
-								View on GitHub
-							</a>
-						</div>
-					</div>
-				</div>
-			</section>
+    <main>
+      {/* Hero Section */}
+      <section class="pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <div class="container mx-auto px-4 relative">
+          <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/5 rounded-full blur-3xl -z-10"
+          >
+          </div>
+          <div class="max-w-3xl mx-auto text-center">
+            <div
+              class="inline-flex items-center space-x-2 bg-muted px-3 py-1 rounded-full text-xs font-medium mb-6 animate-fade-in"
+            >
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex rounded-full h-2 w-2 bg-primary"
+                ></span>
+              </span>
+              <span>Now in Public Alpha</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
+              The dashboard your <span
+                class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
+                >homelab</span
+              > deserves.
+            </h1>
+            <p
+              class="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
+              Nexus is a modern service aggregator built with TypeScript and
+              Next.js. Secure by default with Passkey support, designed for
+              speed and simplicity.
+            </p>
+            <div
+              class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4"
+            >
+              <a
+                href="#quick-start"
+                class="w-full sm:w-auto bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+              >
+                Get Started
+              </a>
+              <a
+                href="https://github.com/kieranholroyd/nexus"
+                class="w-full sm:w-auto bg-secondary text-secondary-foreground px-8 py-4 rounded-xl font-semibold border border-border hover:bg-secondary/80 transition-colors"
+              >
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-			{/* Features Section */}
-			<section id="features" class="py-24 bg-secondary/50 border-y border-border/50">
-				<div class="container mx-auto px-4">
-					<div class="text-center mb-16 max-w-2xl mx-auto">
-						<h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Everything you need, none of the bloat.</h2>
-						<p class="text-lg text-muted-foreground">Purpose-built for enthusiasts who value performance, security, and a clean user experience.</p>
-					</div>
-					<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{features.map((feature) => (
-							<AnimatedCard client:visible title={feature.title} description={feature.description} icon={feature.icon} />
-						))}
-					</div>
-				</div>
-			</section>
+      {/* Features Section */}
+      <section
+        id="features"
+        class="py-24 bg-secondary/50 border-y border-border/50"
+      >
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-16 max-w-2xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+              Everything you need, none of the bloat.
+            </h2>
+            <p class="text-lg text-muted-foreground">
+              Purpose-built for enthusiasts who value performance, security, and
+              a clean user experience.
+            </p>
+          </div>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {
+              features.map((feature) => (
+                <AnimatedCard
+                  client:visible
+                  title={feature.title}
+                  description={feature.description}
+                  icon={feature.icon}
+                />
+              ))
+            }
+          </div>
+        </div>
+      </section>
 
-			{/* Quick Start Section */}
-			<section id="quick-start" class="py-24">
-				<div class="container mx-auto px-4">
-					<div class="max-w-4xl mx-auto">
-						<div class="grid lg:grid-cols-2 gap-12 items-center">
-							<div>
-								<h2 class="text-3xl md:text-4xl font-bold mb-6">Up and running in minutes.</h2>
-								<p class="text-muted-foreground mb-8 text-lg leading-relaxed">
-									Nexus is fully containerized with MySQL and ClickHouse for metrics. Whether you're running on a Raspberry Pi or a full-blown server rack, 
-									getting started is as simple as running docker compose.
-								</p>
-								<div class="space-y-4">
-									<div class="flex items-start space-x-3">
-										<div class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
-										<p class="text-sm">Clone the repository</p>
-									</div>
-									<div class="flex items-start space-x-3">
-										<div class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
-										<p class="text-sm">Configure your services</p>
-									</div>
-									<div class="flex items-start space-x-3">
-										<div class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
-										<p class="text-sm">Run <code class="bg-muted px-1 rounded">make prod</code> or <code class="bg-muted px-1 rounded">docker compose up -d</code></p>
-									</div>
-								</div>
-							</div>
-							<div class="bg-zinc-900 rounded-2xl p-6 shadow-2xl border border-zinc-800 font-mono text-sm overflow-hidden relative">
-								<div class="flex space-x-2 mb-6">
-									<div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
-									<div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-									<div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
-								</div>
-								<div class="text-zinc-400 space-y-2">
-									<p><span class="text-emerald-400">$</span> git clone https://github.com/kieranholroyd/nexus</p>
-									<p><span class="text-emerald-400">$</span> cd nexus</p>
-									<p><span class="text-emerald-400">$</span> make prod</p>
-									<p class="pt-4 text-zinc-500"># Starting MySQL & ClickHouse...</p>
-									<p class="text-zinc-500"># Starting Nexus core (Bun)...</p>
-									<p class="text-green-400">✓ Nexus is running at http://localhost:8080</p>
-								</div>
-								<div class="absolute top-0 right-0 p-4">
-									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-700"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-		</main>
+      {/* Quick Start Section */}
+      <section id="quick-start" class="py-24">
+        <div class="container mx-auto px-4">
+          <div class="max-w-4xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">
+                  Up and running in minutes.
+                </h2>
+                <p class="text-muted-foreground mb-8 text-lg leading-relaxed">
+                  Nexus is fully containerized with MySQL and ClickHouse for
+                  metrics. Whether you're running on a Raspberry Pi or a
+                  full-blown server rack, getting started is as simple as
+                  running docker compose.
+                </p>
+                <div class="space-y-4">
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold"
+                    >
+                      1
+                    </div>
+                    <p class="text-sm">Clone the repository</p>
+                  </div>
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold"
+                    >
+                      2
+                    </div>
+                    <p class="text-sm">Configure your services</p>
+                  </div>
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="mt-1 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold"
+                    >
+                      3
+                    </div>
+                    <p class="text-sm">
+                      Run <code class="bg-muted px-1 rounded">make prod</code> or
+                      <code class="bg-muted px-1 rounded"
+                        >docker compose up -d</code
+                      >
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="bg-zinc-900 rounded-2xl p-6 shadow-2xl border border-zinc-800 font-mono text-sm overflow-hidden relative"
+              >
+                <div class="flex space-x-2 mb-6">
+                  <div
+                    class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"
+                  >
+                  </div>
+                  <div
+                    class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"
+                  >
+                  </div>
+                  <div
+                    class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"
+                  >
+                  </div>
+                </div>
+                <div class="text-zinc-400 space-y-2">
+                  <p>
+                    <span class="text-emerald-400">$</span> git clone https://github.com/kieranholroyd/nexus
+                  </p>
+                  <p><span class="text-emerald-400">$</span> cd nexus</p>
+                  <p><span class="text-emerald-400">$</span> make prod</p>
+                  <p class="pt-4 text-zinc-500">
+                    # Starting MySQL & ClickHouse...
+                  </p>
+                  <p class="text-zinc-500"># Starting Nexus core (Bun)...</p>
+                  <p class="text-green-400">
+                    ✓ Nexus is running at http://localhost:8080
+                  </p>
+                </div>
+                <div class="absolute top-0 right-0 p-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-zinc-700"
+                    ><rect width="14" height="14" x="8" y="8" rx="2" ry="2"
+                    ></rect><path
+                      d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                    ></path></svg
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
 
-		<footer class="py-12 border-t border-border bg-secondary/20">
-			<div class="container mx-auto px-4">
-				<div class="flex flex-col md:flex-row justify-between items-center gap-8">
-					<div class="flex items-center space-x-3">
-						<img src="/nexus.png" alt="Nexus Logo" class="w-8 h-8 filter brightness-0 opacity-70">
-						<span class="font-bold text-xl tracking-tighter text-muted-foreground">Nexus</span>
-					</div>
-					
-					<div class="flex flex-col items-center md:items-end gap-4">
-						<div class="flex justify-center md:justify-end space-x-8 text-sm font-medium text-muted-foreground">
-							<a href="https://github.com/kieranholroyd/nexus" class="hover:text-primary transition-colors">GitHub</a>
-							<a href="#" class="hover:text-primary transition-colors">Documentation</a>
-							<a href="#" class="hover:text-primary transition-colors">Twitter</a>
-						</div>
-						<p class="text-xs text-muted-foreground/60 italic">© {new Date().getFullYear()} Nexus. Built for the modern home server.</p>
-					</div>
-				</div>
-			</div>
-		</footer>
-	</body>
+    <footer class="py-12 border-t border-border bg-secondary/20">
+      <div class="container mx-auto px-4">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center gap-8"
+        >
+          <div class="flex items-center space-x-3">
+            <img
+              src="/nexus.png"
+              alt="Nexus Logo"
+              class="w-8 h-8 filter brightness-0 opacity-70"
+            />
+            <span
+              class="font-bold text-xl tracking-tighter text-muted-foreground"
+              >Nexus</span
+            >
+          </div>
+
+          <div class="flex flex-col items-center md:items-end gap-4">
+            <div
+              class="flex justify-center md:justify-end space-x-8 text-sm font-medium text-muted-foreground"
+            >
+              <a
+                href="https://github.com/kieranholroyd/nexus"
+                class="hover:text-primary transition-colors">GitHub</a
+              >
+              <a href="#" class="hover:text-primary transition-colors"
+                >Documentation</a
+              >
+              <a href="#" class="hover:text-primary transition-colors"
+                >Twitter</a
+              >
+            </div>
+            <p class="text-xs text-muted-foreground/60 italic">
+              © {new Date().getFullYear()} Nexus. Built for the modern home server.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
 </html>
