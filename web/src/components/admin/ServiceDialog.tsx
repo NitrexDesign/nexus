@@ -46,9 +46,9 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
-  new_tab: boolean;
-  check_health: boolean;
+  authRequired: boolean;
+  newTab: boolean;
+  checkHealth: boolean;
 }
 
 interface ServiceDialogProps {
@@ -257,7 +257,7 @@ export function ServiceDialog({
             <RadioGroup
               value={
                 formData.public
-                  ? formData.auth_required
+                  ? formData.authRequired
                     ? "secured"
                     : "public"
                   : "private"
@@ -267,19 +267,19 @@ export function ServiceDialog({
                   setFormData({
                     ...formData,
                     public: true,
-                    auth_required: false,
+                    authRequired: false,
                   });
                 if (val === "secured")
                   setFormData({
                     ...formData,
                     public: true,
-                    auth_required: true,
+                    authRequired: true,
                   });
                 if (val === "private")
                   setFormData({
                     ...formData,
                     public: false,
-                    auth_required: true,
+                    authRequired: true,
                   });
               }}
               className="grid grid-cols-3 gap-2"
@@ -288,14 +288,14 @@ export function ServiceDialog({
                 className={cn(
                   "flex flex-col items-center justify-center rounded-lg border p-2 hover:bg-muted/30 transition-colors cursor-pointer text-center gap-1",
                   formData.public &&
-                    !formData.auth_required &&
+                    !formData.authRequired &&
                     "border-primary bg-primary/5",
                 )}
                 onClick={() =>
                   setFormData({
                     ...formData,
                     public: true,
-                    auth_required: false,
+                    authRequired: false,
                   })
                 }
               >
@@ -318,14 +318,14 @@ export function ServiceDialog({
                 className={cn(
                   "flex flex-col items-center justify-center rounded-lg border p-2 hover:bg-muted/30 transition-colors cursor-pointer text-center gap-1",
                   formData.public &&
-                    formData.auth_required &&
+                    formData.authRequired &&
                     "border-primary bg-primary/5",
                 )}
                 onClick={() =>
                   setFormData({
                     ...formData,
                     public: true,
-                    auth_required: true,
+                    authRequired: true,
                   })
                 }
               >
@@ -353,7 +353,7 @@ export function ServiceDialog({
                   setFormData({
                     ...formData,
                     public: false,
-                    auth_required: true,
+                    authRequired: true,
                   })
                 }
               >
@@ -378,14 +378,14 @@ export function ServiceDialog({
           <div
             className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
             onClick={() =>
-              setFormData({ ...formData, check_health: !formData.check_health })
+              setFormData({ ...formData, checkHealth: !formData.checkHealth })
             }
           >
             <Checkbox
               id="check_health"
-              checked={formData.check_health !== false}
+              checked={formData.checkHealth !== false}
               onCheckedChange={(checked) =>
-                setFormData({ ...formData, check_health: checked === true })
+                setFormData({ ...formData, checkHealth: checked === true })
               }
             />
             <div className="flex-1 cursor-pointer">
@@ -404,14 +404,14 @@ export function ServiceDialog({
           <div
             className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/30 transition-colors cursor-pointer"
             onClick={() =>
-              setFormData({ ...formData, new_tab: !formData.new_tab })
+              setFormData({ ...formData, newTab: !formData.newTab })
             }
           >
             <Checkbox
               id="new_tab"
-              checked={formData.new_tab !== false}
+              checked={formData.newTab !== false}
               onCheckedChange={(checked) =>
-                setFormData({ ...formData, new_tab: checked === true })
+                setFormData({ ...formData, newTab: checked === true })
               }
             />
             <div className="flex-1 cursor-pointer">

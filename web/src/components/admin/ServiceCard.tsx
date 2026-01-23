@@ -13,7 +13,14 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { resolveUrl } from "@/lib/api-client";
 import { UptimeView } from "../UptimeView";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Service {
   id: string;
@@ -23,11 +30,11 @@ interface Service {
   group: string;
   order: number;
   public: boolean;
-  auth_required: boolean;
-  new_tab: boolean;
-  check_health: boolean;
-  health_status?: string;
-  last_checked?: string;
+  authRequired: boolean;
+  newTab: boolean;
+  checkHealth: boolean;
+  healthStatus?: string;
+  lastChecked?: string;
 }
 
 interface ServiceCardProps {
@@ -53,10 +60,18 @@ export function ServiceCard({
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      whileHover={{ y: viewMode === "grid" ? -4 : 0, x: viewMode === "list" ? 4 : 0 }}
+      whileHover={{
+        y: viewMode === "grid" ? -4 : 0,
+        x: viewMode === "list" ? 4 : 0,
+      }}
       transition={{ duration: 0.2 }}
     >
-      <Card className={cn("p-0 transition-colors", isSelected && "border-primary bg-primary/5")}>
+      <Card
+        className={cn(
+          "p-0 transition-colors",
+          isSelected && "border-primary bg-primary/5",
+        )}
+      >
         <CardContent
           className={cn(
             "p-4",
@@ -90,36 +105,62 @@ export function ServiceCard({
                     />
                   )}
                 </div>
-                <Checkbox checked={isSelected} onCheckedChange={onToggleSelect} className="rounded-md" />
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onToggleSelect}
+                  className="rounded-md"
+                />
               </div>
 
               <div>
                 <h3 className="font-bold truncate text-foreground">{s.name}</h3>
-                <p className="text-xs text-muted-foreground truncate opacity-70">{s.url}</p>
+                <p className="text-xs text-muted-foreground truncate opacity-70">
+                  {s.url}
+                </p>
               </div>
 
               <div className="flex gap-2">
-                {s.public && <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">Public</Badge>}
-                {s.auth_required && <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">Secured</Badge>}
-                {s.check_health && (
+                {s.public && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-500/10 text-green-600 border-green-500/20"
+                  >
+                    Public
+                  </Badge>
+                )}
+                {s.authRequired && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-500/10 text-blue-600 border-blue-500/20"
+                  >
+                    Secured
+                  </Badge>
+                )}
+                {s.checkHealth && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={cn(
                           "border-transparent cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors",
-                          s.health_status === "online" ? "bg-green-500/10 text-green-600 border-green-500/20" : 
-                          s.health_status === "offline" ? "bg-red-500/10 text-red-600 border-red-500/20" : 
-                          "bg-neutral-500/10 text-neutral-600 border-neutral-500/20"
+                          s.healthStatus === "online"
+                            ? "bg-green-500/10 text-green-600 border-green-500/20"
+                            : s.healthStatus === "offline"
+                              ? "bg-red-500/10 text-red-600 border-red-500/20"
+                              : "bg-neutral-500/10 text-neutral-600 border-neutral-500/20",
                         )}
                       >
-                        {s.health_status || "Unknown"}
+                        {s.healthStatus || "Unknown"}
                       </Badge>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px] rounded-3xl">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-black">{s.name} Uptime</DialogTitle>
-                        <DialogDescription>Historic performance for the last 30 days.</DialogDescription>
+                        <DialogTitle className="text-2xl font-black">
+                          {s.name} Uptime
+                        </DialogTitle>
+                        <DialogDescription>
+                          Historic performance for the last 30 days.
+                        </DialogDescription>
                       </DialogHeader>
                       <UptimeView serviceId={s.id} />
                     </DialogContent>
@@ -138,13 +179,19 @@ export function ServiceCard({
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                    >
                       <MoreVertical size={14} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="rounded-xl">
                     <DropdownMenuItem
-                      onClick={() => window.open(s.url, s.new_tab ? "_blank" : "_self")}
+                      onClick={() =>
+                        window.open(s.url, s.newTab ? "_blank" : "_self")
+                      }
                       className="cursor-pointer"
                     >
                       Launch Service
@@ -163,7 +210,11 @@ export function ServiceCard({
 
           {viewMode === "list" && (
             <div className="flex items-center gap-4 w-full">
-              <Checkbox checked={isSelected} onCheckedChange={onToggleSelect} className="rounded-md" />
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={onToggleSelect}
+                className="rounded-md"
+              />
               <div className="size-10 rounded-lg border flex items-center justify-center relative overflow-hidden bg-muted group/logo">
                 {s.icon && (
                   <div
@@ -190,7 +241,9 @@ export function ServiceCard({
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="font-bold truncate text-foreground">{s.name}</div>
+                <div className="font-bold truncate text-foreground">
+                  {s.name}
+                </div>
                 <div className="text-xs text-muted-foreground truncate opacity-70">
                   {s.url}
                 </div>
@@ -198,33 +251,49 @@ export function ServiceCard({
               <div className="flex gap-3 items-center">
                 <div className="hidden md:flex gap-2">
                   {s.public && (
-                    <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-500/10 text-green-600 border-green-500/20"
+                    >
                       Public
                     </Badge>
                   )}
-                  {s.auth_required && (
-                    <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                  {s.authRequired && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-500/10 text-blue-600 border-blue-500/20"
+                    >
                       Secured
                     </Badge>
                   )}
                 </div>
-                {s.check_health && (
+                {s.checkHealth && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <div 
+                      <div
                         className={cn(
                           "size-2.5 rounded-full cursor-pointer hover:scale-125 transition-transform",
-                          s.health_status === "online" ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" : 
-                          s.health_status === "offline" ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" : 
-                          "bg-neutral-300 dark:bg-neutral-700"
+                          s.healthStatus === "online"
+                            ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
+                            : s.healthStatus === "offline"
+                              ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                              : "bg-neutral-300 dark:bg-neutral-700",
                         )}
-                        title={s.health_status ? `Status: ${s.health_status} (Click for history)` : "Status: unknown (Click for history)"}
+                        title={
+                          s.healthStatus
+                            ? `Status: ${s.healthStatus} (Click for history)`
+                            : "Status: unknown (Click for history)"
+                        }
                       />
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px] rounded-3xl">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-black">{s.name} Uptime</DialogTitle>
-                        <DialogDescription>Historic performance for the last 30 days.</DialogDescription>
+                        <DialogTitle className="text-2xl font-black">
+                          {s.name} Uptime
+                        </DialogTitle>
+                        <DialogDescription>
+                          Historic performance for the last 30 days.
+                        </DialogDescription>
                       </DialogHeader>
                       <UptimeView serviceId={s.id} />
                     </DialogContent>
@@ -254,4 +323,3 @@ export function ServiceCard({
     </motion.div>
   );
 }
-

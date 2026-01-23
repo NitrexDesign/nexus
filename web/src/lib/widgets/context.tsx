@@ -1,13 +1,20 @@
-// Widgets feature removed — context stub for compatibility
+"use client";
 
-export function WidgetProvider({ children }: { children: any }) {
-  // No-op provider - widgets feature removed
-  return children;
-}
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import type { WidgetConfig, WidgetContextType } from "./types";
+import { widgetRegistry } from "./registry";
+import { apiFetch } from "@/lib/api-client";
+import { toast } from "sonner";
 
-export function useWidgets() {
-  throw new Error("Widgets feature has been removed");
-}
+const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
+
+const DEFAULT_WIDGETS: WidgetConfig[] = [];
 
 // Backend API types
 interface BackendWidgetConfig {

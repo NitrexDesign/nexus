@@ -98,7 +98,7 @@ const LazyServiceCard = memo(
             </span>
             <span className="text-xs font-black italic">
               {service.lastChecked
-                ? new Date(service.last_checked).toLocaleTimeString()
+                ? new Date(service.lastChecked).toLocaleTimeString()
                 : "Never"}
             </span>
           </div>
