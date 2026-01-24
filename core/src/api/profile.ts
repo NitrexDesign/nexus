@@ -110,10 +110,7 @@ export async function updatePassword(c: Context) {
     const passwordHash = await hashPassword(newPassword);
 
     await runTask(async () => {
-      await db
-        .update(users)
-        .set({ passwordHash })
-        .where(eq(users.id, userId));
+      await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
     });
 
     return c.json({ success: true, message: "Password updated successfully" });

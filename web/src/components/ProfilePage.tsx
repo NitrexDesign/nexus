@@ -50,7 +50,8 @@ export function ProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const userId =
+    typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ["profile"],
@@ -167,7 +168,9 @@ export function ProfilePage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Authentication Required</CardTitle>
-            <CardDescription>Please log in to view your profile</CardDescription>
+            <CardDescription>
+              Please log in to view your profile
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -190,7 +193,9 @@ export function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-2"
         >
-          <h1 className="text-4xl font-black tracking-tight">Profile Settings</h1>
+          <h1 className="text-4xl font-black tracking-tight">
+            Profile Settings
+          </h1>
           <p className="text-muted-foreground text-lg">
             Manage your account security and authentication methods
           </p>
@@ -212,11 +217,15 @@ export function ProfilePage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground text-sm">Username</Label>
+                  <Label className="text-muted-foreground text-sm">
+                    Username
+                  </Label>
                   <p className="font-semibold">{profile?.username}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground text-sm">Status</Label>
+                  <Label className="text-muted-foreground text-sm">
+                    Status
+                  </Label>
                   <div>
                     {profile?.approved ? (
                       <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
@@ -312,8 +321,8 @@ export function ProfilePage() {
                     Passkeys
                   </CardTitle>
                   <CardDescription>
-                    Secure, passwordless authentication using biometrics or security
-                    keys
+                    Secure, passwordless authentication using biometrics or
+                    security keys
                   </CardDescription>
                 </div>
                 <Button
@@ -348,12 +357,11 @@ export function ProfilePage() {
                           <Key className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <div className="font-medium">
-                            Passkey {index + 1}
-                          </div>
+                          <div className="font-medium">Passkey {index + 1}</div>
                           <div className="text-sm text-muted-foreground flex items-center gap-2">
                             <Calendar className="h-3 w-3" />
-                            Added {new Date(passkey.createdAt).toLocaleDateString()}
+                            Added{" "}
+                            {new Date(passkey.createdAt).toLocaleDateString()}
                             <span className="text-xs">
                               • Used {passkey.signCount} times
                             </span>

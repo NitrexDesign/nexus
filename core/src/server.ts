@@ -195,7 +195,8 @@ async function startServer() {
       rpID: config.webauthn.rpID,
       origin: config.webauthn.origin,
     });
-    initAuthHandlers(webauthnConfig);    initProfileHandlers(webauthnConfig);
+    initAuthHandlers(webauthnConfig);
+    initProfileHandlers(webauthnConfig);
     // Start health checker
     console.log("[Server] Starting health checker...");
     startHealthChecker(config.healthCheckInterval);
