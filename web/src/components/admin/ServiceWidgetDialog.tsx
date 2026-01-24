@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Edit, Eye, EyeOff } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
+import { getWidgetConfig, renderField } from "./widget-configs";
 
 interface ServiceWidget {
   id: string;
@@ -60,6 +61,16 @@ export function ServiceWidgetDialog({
     settings: {},
     order: 0,
     isVisible: true,
+  });
+
+  // Fetch available widget types from backend registry
+  const { data: widgetTypes = [] } = useQuery<string[]>({
+    queryKey: ["widgetTypes"],
+    queryFn: async () => {
+      const res = await apiFetch("/api/services/widgets/types");
+      if (!res.ok) throw new Error("Failed to fetch widget types");
+      return res.json();
+    },
   });
 
   // Fetch widgets for this service
@@ -185,132 +196,37 @@ export function ServiceWidgetDialog({
     });
   };
 
-  // Parse content based on widget type
+  // Dynamically render fields based on widget type configuration
   const getContentFields = () => {
-    switch (formData.type) {
-      case "metric":
-        return (
-          <>
-            <div>
-              <Label>Value</Label>
-              <Input
-                value={formData.content?.value || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    content: { ...formData.content, value: e.target.value },
-                  })
-                }
-                placeholder="42"
-              />
-            </div>
-            <div>
-              <Label>Unit (optional)</Label>
-              <Input
-                value={formData.content?.unit || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    content: { ...formData.content, unit: e.target.value },
-                  })
-                }
-                placeholder="ms, %, MB"
-              />
-            </div>
-          </>
-        );
-      case "link":
-        return (
-          <>
-            <div>
-              <Label>URL</Label>
-              <Input
-                type="url"
-                value={formData.content?.url || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    content: { ...formData.content, url: e.target.value },
-                  })
-                }
-                placeholder="https://example.com/docs"
-              />
-            </div>
-            <div>
-              <Label>Link Text</Label>
-              <Input
-                value={formData.content?.text || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    content: { ...formData.content, text: e.target.value },
-                  })
-                }
-                placeholder="View Documentation"
-              />
-            </div>
-          </>
-        );
-      case "info":
-        return (
-          <div>
-            <Label>Description</Label>
-            <Textarea
-              value={formData.content?.description || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  content: { ...formData.content, description: e.target.value },
-                })
-              }
-              placeholder="Additional information about this service..."
-              rows={3}
-            />
-          </div>
-        );
-      case "status":
-        return (
-          <>
-            <div>
-              <Label>Status</Label>
-              <Select
-                value={formData.content?.status || "info"}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    content: { ...formData.content, status: value },
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="success">Success</SelectItem>
-                  <SelectItem value="warning">Warning</SelectItem>
-                  <SelectItem value="error">Error</SelectItem>
-                  <SelectItem value="info">Info</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Message</Label>
-              <Input
-                value={formData.content?.message || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    content: { ...formData.content, message: e.target.value },
-                  })
-                }
-                placeholder="Service is operating normally"
-              />
-            </div>
-          </>
-        );
-      default:
-        return null;
+    const config = getWidgetConfig(formData.type || "");
+
+    if (!config || config.fields.length === 0) {
+      return (
+        <div className="col-span-2 text-sm text-muted-foreground">
+          Widget type "{formData.type}" has no configuration fields. Content
+          will be fetched automatically.
+        </div>
+      );
     }
+
+    return config.fields.map((field) => {
+      const targetData =
+        field.target === "content" ? formData.content : formData.settings;
+      const value = targetData?.[field.name];
+
+      const handleChange = (newValue: any) => {
+        const target = field.target === "content" ? "content" : "settings";
+        setFormData({
+          ...formData,
+          [target]: {
+            ...formData[target],
+            [field.name]: newValue,
+          },
+        });
+      };
+
+      return renderField(field, value, handleChange);
+    });
   };
 
   return (
@@ -344,17 +260,23 @@ export function ServiceWidgetDialog({
                   <Select
                     value={formData.type}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, type: value, content: {} })
+                      setFormData({
+                        ...formData,
+                        type: value,
+                        content: {},
+                        settings: {},
+                      })
                     }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="info">Info Card</SelectItem>
-                      <SelectItem value="metric">Metric</SelectItem>
-                      <SelectItem value="link">Link</SelectItem>
-                      <SelectItem value="status">Status Badge</SelectItem>
+                      {widgetTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -371,7 +293,7 @@ export function ServiceWidgetDialog({
                 </div>
               </div>
 
-              {getContentFields()}
+              <div className="grid grid-cols-2 gap-4">{getContentFields()}</div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -424,53 +346,112 @@ export function ServiceWidgetDialog({
                 </CardContent>
               </Card>
             ) : (
-              widgets.map((widget) => (
-                <Card key={widget.id}>
-                  <CardContent className="py-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold">{widget.title}</h4>
-                          <Badge variant="outline">{widget.type}</Badge>
-                          {!widget.isVisible && (
-                            <Badge variant="secondary">Hidden</Badge>
-                          )}
+              <div className="space-y-2">
+                {widgets.map((widget) => (
+                  <Card key={widget.id} className="hover:bg-accent/50 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        {/* Left side - Widget info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-3">
+                            <h4 className="font-semibold text-base">{widget.title}</h4>
+                            <Badge variant="outline" className="text-xs">
+                              {widget.type}
+                            </Badge>
+                            {!widget.isVisible && (
+                              <Badge variant="secondary" className="text-xs">
+                                Hidden
+                              </Badge>
+                            )}
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              Order: {widget.order}
+                            </span>
+                          </div>
+
+                          {/* Content and Settings in a cleaner format */}
+                          <div className="space-y-2">
+                            {(() => {
+                              // Parse content if it's a string
+                              const content = typeof widget.content === 'string' 
+                                ? JSON.parse(widget.content) 
+                                : widget.content;
+                              const contentKeys = Object.keys(content || {});
+                              
+                              return contentKeys.length > 0 && (
+                                <div className="text-sm">
+                                  <span className="font-medium text-muted-foreground">Content: </span>
+                                  <span className="text-foreground">
+                                    {Object.entries(content)
+                                      .map(([key, value]) => `${key}: ${value}`)
+                                      .join(", ")}
+                                  </span>
+                                </div>
+                              );
+                            })()}
+                            {(() => {
+                              // Parse settings if it's a string
+                              const settings = typeof widget.settings === 'string'
+                                ? JSON.parse(widget.settings)
+                                : widget.settings;
+                              const settingsKeys = Object.keys(settings || {});
+                              
+                              return settingsKeys.length > 0 && (
+                                <div className="text-sm">
+                                  <span className="font-medium text-muted-foreground">Settings: </span>
+                                  <span className="text-foreground">
+                                    {Object.entries(settings)
+                                      .map(([key, value]) => {
+                                        // Mask sensitive values like tokens
+                                        if (key.toLowerCase().includes("token") && typeof value === "string") {
+                                          return `${key}: ${value.substring(0, 20)}...`;
+                                        }
+                                        return `${key}: ${value}`;
+                                      })
+                                      .join(", ")}
+                                  </span>
+                                </div>
+                              );
+                            })()}
+                          </div>
                         </div>
-                        <pre className="text-xs text-muted-foreground bg-muted p-2 rounded overflow-x-auto">
-                          {JSON.stringify(widget.content, null, 2)}
-                        </pre>
+
+                        {/* Right side - Action buttons */}
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toggleVisibility(widget)}
+                            title={widget.isVisible ? "Hide widget" : "Show widget"}
+                          >
+                            {widget.isVisible ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(widget)}
+                            title="Edit widget"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteMutation.mutate(widget.id)}
+                            title="Delete widget"
+                            className="hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => toggleVisibility(widget)}
-                        >
-                          {widget.isVisible ? (
-                            <Eye className="h-4 w-4" />
-                          ) : (
-                            <EyeOff className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(widget)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteMutation.mutate(widget.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
           </div>
         </div>

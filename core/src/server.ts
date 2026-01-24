@@ -15,9 +15,8 @@ import * as profileHandlers from "./api/profile";
 import * as serviceHandlers from "./api/services";
 import * as iconHandlers from "./api/icons";
 import * as userHandlers from "./api/users";
-import * as embedHandlers from "./api/embeds";
 import * as serviceWidgetHandlers from "./api/service-widgets";
-import { validateEmbedApiKey, requireAdmin } from "./auth/api-keys";
+import { requireAdmin } from "./auth/api-keys";
 // Widgets API removed
 
 const app = new Hono();
@@ -70,6 +69,7 @@ app.get(
   "/api/services/widgets/bulk",
   serviceWidgetHandlers.getBulkServiceWidgets,
 );
+app.get("/api/services/widgets/types", serviceWidgetHandlers.getWidgetTypes);
 
 // Service widgets routes - Admin (requires auth)
 app.get(
@@ -102,31 +102,6 @@ app.post("/api/icons/upload", iconHandlers.uploadIcon);
 app.get("/api/users", userHandlers.getUsers);
 app.put("/api/users/:id/approve", userHandlers.approveUser);
 app.delete("/api/users/:id", userHandlers.deleteUser);
-
-// Embed routes - Admin endpoints (requires auth)
-app.get("/api/embed/configs", requireAdmin, embedHandlers.getEmbedConfigs);
-app.post("/api/embed/configs", requireAdmin, embedHandlers.createEmbedConfig);
-app.put(
-  "/api/embed/configs/:id",
-  requireAdmin,
-  embedHandlers.updateEmbedConfig,
-);
-app.delete(
-  "/api/embed/configs/:id",
-  requireAdmin,
-  embedHandlers.deleteEmbedConfig,
-);
-app.post(
-  "/api/embed/configs/:id/regenerate-key",
-  requireAdmin,
-  embedHandlers.regenerateApiKey,
-);
-
-// Embed routes - Public endpoints (requires API key)
-app.get("/api/embed/bulk", validateEmbedApiKey, embedHandlers.getBulkEmbedData);
-app.get("/api/embed/:id/data", validateEmbedApiKey, embedHandlers.getEmbedData);
-
-// Widget API removed
 
 // Serve icons from data/icons directory
 const iconsPath = path.resolve(process.cwd(), config.iconsDir);
