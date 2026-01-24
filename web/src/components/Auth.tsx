@@ -34,35 +34,41 @@ export function Auth({ onLogin }: AuthProps) {
   const registerMutation = useMutation({
     mutationFn: async () => {
       if (!username) throw new Error("Please enter a username");
+      let result;
       if (password) {
-        await api.registerWithPassword(username, password);
-        return "Account created! You can now authenticate.";
+        result = await api.registerWithPassword(username, password);
+        return { message: "Account created! You can now authenticate.", result };
       } else {
         const options = await api.beginRegistration(username);
         const attestationResponse = await startRegistration({ optionsJSON: options });
-        await api.finishRegistration(username, attestationResponse);
-        return "Identity profile initialized! You can now authenticate.";
+        result = await api.finishRegistration(username, attestationResponse);
+        return { message: "Identity profile initialized! You can now authenticate.", result };
       }
     },
-    onSuccess: (msg) => toast.success(msg),
+    onSuccess: (data) => toast.success(data.message),
     onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to initialize account"),
   });
 
   const loginMutation = useMutation({
     mutationFn: async () => {
       if (!username) throw new Error("Please enter your username");
+      let result;
       if (password) {
-        await api.loginWithPassword(username, password);
+        result = await api.loginWithPassword(username, password);
       } else {
         const options = await api.beginLogin(username);
         const assertionResponse = await startAuthentication({ optionsJSON: options });
-        await api.finishLogin(username, assertionResponse);
+        result = await api.finishLogin(username, assertionResponse);
       }
-      return { username };
+      return result;
     },
-    onSuccess: (u) => {
+    onSuccess: (result) => {
+      // Store userId in localStorage for admin operations
+      if (result.userId) {
+        localStorage.setItem("userId", result.userId);
+      }
       toast.success("Access granted. Welcome back.");
-      onLogin(u);
+      onLogin({ username: result.username });
       queryClient.invalidateQueries(); // Refresh everything after login
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Authentication verification failed"),
