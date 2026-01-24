@@ -211,7 +211,10 @@ export async function finishAddPasskey(c: Context) {
       return c.json({ error: "Registration verification failed" }, 400);
     }
 
-    console.log("[Profile] Registration info:", JSON.stringify(Object.keys(verification.registrationInfo)));
+    console.log(
+      "[Profile] Registration info:",
+      JSON.stringify(Object.keys(verification.registrationInfo)),
+    );
 
     const {
       credential,
