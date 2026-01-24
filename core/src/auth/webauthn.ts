@@ -44,7 +44,7 @@ export async function startRegistration(
   const options = await generateRegistrationOptions({
     rpName: config.rpName,
     rpID: config.rpID,
-    userID: userId,
+    userID: Buffer.from(userId, "utf-8"),
     userName: username,
     attestationType: "none",
     authenticatorSelection: {

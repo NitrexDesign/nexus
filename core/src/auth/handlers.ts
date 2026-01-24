@@ -65,7 +65,7 @@ export async function registerPassword(c: Context) {
       });
     });
 
-    return c.text("Registration successful", 200);
+    return c.json({ success: true, userId, username });
   } catch (error: any) {
     console.error("[Auth] Password registration error:", error);
     return c.json({ error: error.message }, 500);
@@ -110,7 +110,7 @@ export async function loginPassword(c: Context) {
       return c.json({ error: "Invalid username or password" }, 401);
     }
 
-    return c.text("Login successful", 200);
+    return c.json({ success: true, userId: user.id, username: user.username });
   } catch (error: any) {
     console.error("[Auth] Password login error:", error);
     return c.json({ error: error.message }, 500);
@@ -219,7 +219,7 @@ export async function finishWebAuthnRegistration(c: Context) {
       });
     });
 
-    return c.text("Registration successful", 200);
+    return c.json({ success: true, userId, username });
   } catch (error: any) {
     console.error("[Auth] WebAuthn registration finish error:", error);
     return c.json({ error: error.message }, 500);
@@ -342,7 +342,7 @@ export async function finishWebAuthnLogin(c: Context) {
       });
     }
 
-    return c.text("Login successful", 200);
+    return c.json({ success: true, userId: user.id, username: user.username });
   } catch (error: any) {
     console.error("[Auth] WebAuthn login finish error:", error);
     return c.json({ error: error.message }, 500);
