@@ -7,24 +7,32 @@ The service widgets feature allows you to add customizable information cards to 
 ## Widget Types
 
 ### 1. **Metric Widget**
+
 Display key performance indicators or statistics.
+
 - **Value**: The numeric or text value to display
 - **Unit**: Optional unit (e.g., "ms", "%", "MB", "req/s")
 - **Example**: Response time: 45ms
 
 ### 2. **Info Widget**
+
 Display helpful text or descriptions.
+
 - **Description**: Markdown-style text content
 - **Example**: Service maintenance window, usage notes, documentation snippets
 
 ### 3. **Link Widget**
+
 Add quick access buttons to related resources.
+
 - **URL**: Target destination
 - **Link Text**: Button label
 - **Example**: "View Documentation", "API Status", "Support Portal"
 
 ### 4. **Status Badge**
+
 Display custom status information with color-coded badges.
+
 - **Status**: success, warning, error, or info
 - **Message**: Status text to display
 - **Example**: "Maintenance Mode", "Beta", "Production Ready"
@@ -47,6 +55,7 @@ Display custom status information with color-coded badges.
 ### Managing Existing Widgets
 
 In the same widget management dialog:
+
 - **Edit**: Click the edit icon to modify a widget
 - **Toggle Visibility**: Click the eye icon to show/hide without deleting
 - **Delete**: Click the trash icon to remove permanently
@@ -54,6 +63,7 @@ In the same widget management dialog:
 ## Public Display
 
 Widgets appear at the bottom of each service card on the public dashboard:
+
 - Widgets are sorted by their display order (ascending)
 - Only visible widgets are shown to public users
 - Widgets animate in with a subtle stagger effect
@@ -62,6 +72,7 @@ Widgets appear at the bottom of each service card on the public dashboard:
 ## Technical Details
 
 ### Database Schema
+
 ```typescript
 serviceWidgets {
   id: string (UUID)
@@ -80,10 +91,12 @@ serviceWidgets {
 ### API Endpoints
 
 **Public Endpoints:**
+
 - `GET /api/services/:serviceId/widgets` - Get visible widgets for a service
 - `GET /api/services/widgets/bulk?serviceIds=id1,id2` - Bulk fetch for multiple services
 
 **Admin Endpoints** (requires `X-User-Id` header):
+
 - `GET /api/services/widgets/admin/:serviceId` - Get all widgets (including hidden)
 - `POST /api/services/:serviceId/widgets` - Create new widget
 - `PUT /api/services/widgets/:id` - Update widget
@@ -106,6 +119,7 @@ serviceWidgets {
 ## Future Enhancements
 
 Potential features for future versions:
+
 - Chart widgets with sparklines or mini graphs
 - Real-time data widgets (auto-refresh from API)
 - Widget templates for common use cases

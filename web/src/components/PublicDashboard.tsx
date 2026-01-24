@@ -336,7 +336,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                         </div>
                       </div>
                     </CardContent>
-                    
+
                     {/* Widgets Section */}
                     {widgetsMap[s.id] && widgetsMap[s.id].length > 0 && (
                       <div
@@ -510,7 +510,7 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                               </div>
                             </div>
                           </CardContent>
-                          
+
                           {/* Widgets Section */}
                           {widgetsMap[s.id] && widgetsMap[s.id].length > 0 && (
                             <div

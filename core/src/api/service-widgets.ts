@@ -60,7 +60,10 @@ export async function getBulkServiceWidgets(c: Context) {
       .orderBy(serviceWidgets.order);
 
     // Group widgets by serviceId
-    const widgetsByService: Record<string, typeof serviceWidgets.$inferSelect[]> = {};
+    const widgetsByService: Record<
+      string,
+      (typeof serviceWidgets.$inferSelect)[]
+    > = {};
 
     allWidgets.forEach((widget) => {
       if (serviceIds.includes(widget.serviceId)) {

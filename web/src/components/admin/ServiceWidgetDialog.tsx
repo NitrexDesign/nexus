@@ -66,14 +66,11 @@ export function ServiceWidgetDialog({
   const { data: widgets = [], isLoading } = useQuery<ServiceWidget[]>({
     queryKey: ["serviceWidgets", serviceId],
     queryFn: async () => {
-      const res = await apiFetch(
-        `/api/services/widgets/admin/${serviceId}`,
-        {
-          headers: {
-            "X-User-Id": localStorage.getItem("userId") || "",
-          },
+      const res = await apiFetch(`/api/services/widgets/admin/${serviceId}`, {
+        headers: {
+          "X-User-Id": localStorage.getItem("userId") || "",
         },
-      );
+      });
       if (!res.ok) throw new Error("Failed to fetch widgets");
       return res.json();
     },
@@ -95,7 +92,9 @@ export function ServiceWidgetDialog({
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["serviceWidgets", serviceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["serviceWidgets", serviceId],
+      });
       resetForm();
     },
   });
@@ -121,7 +120,9 @@ export function ServiceWidgetDialog({
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["serviceWidgets", serviceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["serviceWidgets", serviceId],
+      });
       resetForm();
     },
   });
@@ -139,7 +140,9 @@ export function ServiceWidgetDialog({
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["serviceWidgets", serviceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["serviceWidgets", serviceId],
+      });
     },
   });
 
@@ -391,7 +394,10 @@ export function ServiceWidgetDialog({
                       type="checkbox"
                       checked={formData.isVisible}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFormData({ ...formData, isVisible: e.target.checked })
+                        setFormData({
+                          ...formData,
+                          isVisible: e.target.checked,
+                        })
                       }
                       className="rounded"
                     />

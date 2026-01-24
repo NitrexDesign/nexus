@@ -59,14 +59,36 @@ app.get("/api/services/:id/uptime", serviceHandlers.getServiceUptime);
 app.get("/api/services/uptime", serviceHandlers.getAllServicesUptime);
 
 // Service widgets routes - Public
-app.get("/api/services/:serviceId/widgets", serviceWidgetHandlers.getServiceWidgets);
-app.get("/api/services/widgets/bulk", serviceWidgetHandlers.getBulkServiceWidgets);
+app.get(
+  "/api/services/:serviceId/widgets",
+  serviceWidgetHandlers.getServiceWidgets,
+);
+app.get(
+  "/api/services/widgets/bulk",
+  serviceWidgetHandlers.getBulkServiceWidgets,
+);
 
 // Service widgets routes - Admin (requires auth)
-app.get("/api/services/widgets/admin/:serviceId", requireAdmin, serviceWidgetHandlers.getAdminServiceWidgets);
-app.post("/api/services/:serviceId/widgets", requireAdmin, serviceWidgetHandlers.createServiceWidget);
-app.put("/api/services/widgets/:id", requireAdmin, serviceWidgetHandlers.updateServiceWidget);
-app.delete("/api/services/widgets/:id", requireAdmin, serviceWidgetHandlers.deleteServiceWidget);
+app.get(
+  "/api/services/widgets/admin/:serviceId",
+  requireAdmin,
+  serviceWidgetHandlers.getAdminServiceWidgets,
+);
+app.post(
+  "/api/services/:serviceId/widgets",
+  requireAdmin,
+  serviceWidgetHandlers.createServiceWidget,
+);
+app.put(
+  "/api/services/widgets/:id",
+  requireAdmin,
+  serviceWidgetHandlers.updateServiceWidget,
+);
+app.delete(
+  "/api/services/widgets/:id",
+  requireAdmin,
+  serviceWidgetHandlers.deleteServiceWidget,
+);
 
 // Icon routes
 app.get("/api/icons/search", iconHandlers.searchIcons);

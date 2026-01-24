@@ -439,11 +439,12 @@ export function ServiceDialog({
             {editingId === "new" ? "Create" : "Save Changes"}
           </Button>
         </DialogFooter>
-        
+
         {editingId && editingId !== "new" && formData.name && (
           <div className="border-t pt-4 mt-2">
             <p className="text-sm text-muted-foreground mb-2">
-              After saving, you can manage custom widgets for this service from the service card.
+              After saving, you can manage custom widgets for this service from
+              the service card.
             </p>
           </div>
         )}

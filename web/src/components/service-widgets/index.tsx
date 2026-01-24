@@ -44,7 +44,7 @@ interface MetricWidgetProps {
 
 export function MetricWidget({ widget }: MetricWidgetProps) {
   const { value, unit } = widget.content;
-  
+
   return (
     <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
       <div className="flex items-center gap-2">
@@ -53,7 +53,9 @@ export function MetricWidget({ widget }: MetricWidgetProps) {
       </div>
       <div className="text-right">
         <span className="text-lg font-bold">{value}</span>
-        {unit && <span className="text-xs text-muted-foreground ml-1">{unit}</span>}
+        {unit && (
+          <span className="text-xs text-muted-foreground ml-1">{unit}</span>
+        )}
       </div>
     </div>
   );
@@ -65,11 +67,14 @@ interface InfoWidgetProps {
 
 export function InfoWidget({ widget }: InfoWidgetProps) {
   const { description } = widget.content;
-  
+
   return (
     <div className="p-3 rounded-lg border bg-muted/30">
       <div className="flex items-start gap-2">
-        <Info size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+        <Info
+          size={16}
+          className="text-muted-foreground mt-0.5 flex-shrink-0"
+        />
         <div>
           <div className="text-sm font-medium mb-1">{widget.title}</div>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -87,7 +92,7 @@ interface LinkWidgetProps {
 
 export function LinkWidget({ widget }: LinkWidgetProps) {
   const { url, text } = widget.content;
-  
+
   return (
     <Button
       variant="outline"
@@ -110,14 +115,14 @@ interface StatusWidgetProps {
 
 export function StatusWidget({ widget }: StatusWidgetProps) {
   const { status, message } = widget.content;
-  
+
   const statusStyles = {
     success: "bg-green-500/10 text-green-600 border-green-500/20",
     warning: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
     error: "bg-red-500/10 text-red-600 border-red-500/20",
     info: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   };
-  
+
   return (
     <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
       <span className="text-sm font-medium">{widget.title}</span>
@@ -145,7 +150,7 @@ export function ServiceWidgetRenderer({
   index,
 }: ServiceWidgetRendererProps) {
   let content;
-  
+
   switch (widget.type) {
     case "metric":
       content = <MetricWidget widget={widget} />;
@@ -162,7 +167,7 @@ export function ServiceWidgetRenderer({
     default:
       return null;
   }
-  
+
   return (
     <ServiceWidgetWrapper widget={widget} index={index}>
       {content}

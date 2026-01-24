@@ -15,9 +15,9 @@ echo ""
 # 1. Add a metric widget
 echo "📊 Adding metric widget..."
 curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: $USER_ID" \
-  -d '{
+-H "Content-Type: application/json" \
+-H "X-User-Id: $USER_ID" \
+-d '{
     "type": "metric",
     "title": "Response Time",
     "content": {
@@ -26,15 +26,15 @@ curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
     },
     "order": 1,
     "isVisible": true
-  }' | jq .
+}' | jq .
 
 # 2. Add an info widget
 echo ""
 echo "ℹ️  Adding info widget..."
 curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: $USER_ID" \
-  -d '{
+-H "Content-Type: application/json" \
+-H "X-User-Id: $USER_ID" \
+-d '{
     "type": "info",
     "title": "About",
     "content": {
@@ -42,15 +42,15 @@ curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
     },
     "order": 2,
     "isVisible": true
-  }' | jq .
+}' | jq .
 
 # 3. Add a link widget
 echo ""
 echo "🔗 Adding link widget..."
 curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: $USER_ID" \
-  -d '{
+-H "Content-Type: application/json" \
+-H "X-User-Id: $USER_ID" \
+-d '{
     "type": "link",
     "title": "Documentation",
     "content": {
@@ -59,15 +59,15 @@ curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
     },
     "order": 3,
     "isVisible": true
-  }' | jq .
+}' | jq .
 
 # 4. Add a status badge widget
 echo ""
 echo "✅ Adding status widget..."
 curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: $USER_ID" \
-  -d '{
+-H "Content-Type: application/json" \
+-H "X-User-Id: $USER_ID" \
+-d '{
     "type": "status",
     "title": "Environment",
     "content": {
@@ -76,7 +76,7 @@ curl -X POST "$BASE_URL/api/services/$SERVICE_ID/widgets" \
     },
     "order": 0,
     "isVisible": true
-  }' | jq .
+}' | jq .
 
 echo ""
 echo "✨ Done! View your widgets at $BASE_URL"
