@@ -31,7 +31,6 @@ import { motion } from "framer-motion";
 interface Passkey {
   id: string;
   type: string;
-  createdAt: string;
   signCount: number;
 }
 
@@ -359,11 +358,8 @@ export function ProfilePage() {
                         <div>
                           <div className="font-medium">Passkey {index + 1}</div>
                           <div className="text-sm text-muted-foreground flex items-center gap-2">
-                            <Calendar className="h-3 w-3" />
-                            Added{" "}
-                            {new Date(passkey.createdAt).toLocaleDateString()}
                             <span className="text-xs">
-                              • Used {passkey.signCount} times
+                              Used {passkey.signCount} times
                             </span>
                           </div>
                         </div>

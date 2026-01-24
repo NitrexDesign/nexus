@@ -59,6 +59,8 @@ export async function startRegistration(
     userId,
   });
 
+  console.log("[WebAuthn] Stored session for:", username, "Sessions:", Array.from(sessionStore.keys()));
+
   return options;
 }
 
@@ -67,6 +69,7 @@ export async function finishRegistration(
   response: RegistrationResponseJSON,
   config: WebAuthnConfig,
 ): Promise<VerifiedRegistrationResponse> {
+  console.log("[WebAuthn] Looking for session:", username, "Available:", Array.from(sessionStore.keys()));
   const session = sessionStore.get(username);
   if (!session) {
     throw new Error("No registration session found for user");

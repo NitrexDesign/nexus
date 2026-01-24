@@ -88,7 +88,7 @@ export async function createServiceWidget(c: Context) {
     const body = await c.req.json();
     const { type, title, content, settings, order, isVisible } = body;
 
-    if (!type || !title || !content) {
+    if (!type || title === undefined || !content) {
       return c.json(
         { error: "Missing required fields: type, title, content" },
         400,

@@ -44,7 +44,6 @@ export async function getProfile(c: Context) {
       .select({
         id: credentials.id,
         attestationType: credentials.attestationType,
-        createdAt: credentials.createdAt,
         signCount: credentials.signCount,
       })
       .from(credentials)
@@ -59,7 +58,6 @@ export async function getProfile(c: Context) {
       passkeys: userCreds.map((cred) => ({
         id: cred.id.toString("base64url"),
         type: cred.attestationType,
-        createdAt: cred.createdAt,
         signCount: cred.signCount,
       })),
     });
@@ -154,6 +152,8 @@ export async function beginAddPasskey(c: Context) {
       webauthnConfig,
     );
 
+    console.log("[Profile] Started passkey registration for:", user.username);
+
     // Exclude existing credentials
     if (existingCreds.length > 0) {
       options.excludeCredentials = existingCreds.map((cred) => ({
@@ -198,6 +198,8 @@ export async function finishAddPasskey(c: Context) {
       return c.json({ error: "User not found" }, 404);
     }
 
+    console.log("[Profile] Finishing passkey registration for:", user.username);
+
     // Verify registration
     const verification = await webauthn.finishRegistration(
       user.username,
@@ -209,26 +211,29 @@ export async function finishAddPasskey(c: Context) {
       return c.json({ error: "Registration verification failed" }, 400);
     }
 
+    console.log("[Profile] Registration info:", JSON.stringify(Object.keys(verification.registrationInfo)));
+
     const {
-      credentialID,
-      credentialPublicKey,
+      credential,
       counter,
       aaguid,
       credentialBackedUp,
       credentialDeviceType,
     } = verification.registrationInfo;
 
+    console.log("[Profile] Credential:", credential);
+
     await runTask(async () => {
       await db.insert(credentials).values({
-        id: Buffer.from(credentialID),
+        id: Buffer.from(credential.id),
         userId,
-        publicKey: Buffer.from(credentialPublicKey),
+        publicKey: Buffer.from(credential.publicKey),
         attestationType: credentialDeviceType || "none",
-        aaguid: Buffer.from(aaguid),
-        signCount: counter,
+        aaguid: Buffer.from(aaguid || new Uint8Array(16)),
+        signCount: counter || 0,
         cloneWarning: false,
-        backupEligible: credentialBackedUp,
-        backupState: credentialBackedUp,
+        backupEligible: credentialBackedUp || false,
+        backupState: credentialBackedUp || false,
       });
     });
 

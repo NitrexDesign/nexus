@@ -72,7 +72,7 @@ export const config: Config = {
     rpID: process.env.WEBAUTHN_RP_ID || "localhost",
     origin: parseOrigins(
       process.env.WEBAUTHN_RP_ORIGIN ||
-        "http://localhost:5173,http://localhost:8080",
+        "http://localhost:3000,http://localhost:8080",
     ),
   },
 
