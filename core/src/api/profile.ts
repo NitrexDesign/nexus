@@ -29,7 +29,7 @@ export async function getProfile(c: Context) {
         username: users.username,
         displayName: users.displayName,
         approved: users.approved,
-        hasPassword: users.passwordHash,
+        passwordHash: users.passwordHash,
       })
       .from(users)
       .where(eq(users.id, userId))
@@ -55,7 +55,7 @@ export async function getProfile(c: Context) {
       username: user.username,
       displayName: user.displayName,
       approved: user.approved,
-      hasPassword: !!user.hasPassword,
+      hasPassword: !!user.passwordHash,
       passkeys: userCreds.map((cred) => ({
         id: cred.id.toString("base64url"),
         type: cred.attestationType,
