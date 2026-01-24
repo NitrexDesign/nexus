@@ -185,7 +185,7 @@ export async function getBulkEmbedData(c: Context) {
         const publicServices = await db
           .select()
           .from(services)
-          .where(eq(services.public, true));
+          .where(eq(services.public, 1));
         data.services = publicServices;
         break;
       }
@@ -195,7 +195,7 @@ export async function getBulkEmbedData(c: Context) {
         const publicServices = await db
           .select()
           .from(services)
-          .where(eq(services.public, true));
+          .where(eq(services.public, 1));
 
         // Fetch uptime for each service
         const uptimePromises = publicServices.map(async (service) => {
@@ -226,7 +226,7 @@ export async function getBulkEmbedData(c: Context) {
         const publicServices = await db
           .select()
           .from(services)
-          .where(eq(services.public, true));
+          .where(eq(services.public, 1));
 
         const total = publicServices.length;
         const healthy = publicServices.filter(

@@ -7,10 +7,10 @@ export async function beginRegistration(username: string) {
 }
 
 export async function finishRegistration(username: string, data: unknown) {
-  const res = await apiFetch(`/api/auth/register/finish?username=${username}`, {
+  const res = await apiFetch(`/api/auth/register/finish`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ username, response: data }),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -23,10 +23,10 @@ export async function beginLogin(username: string) {
 }
 
 export async function finishLogin(username: string, data: unknown) {
-  const res = await apiFetch(`/api/auth/login/finish?username=${username}`, {
+  const res = await apiFetch(`/api/auth/login/finish`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ username, response: data }),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();

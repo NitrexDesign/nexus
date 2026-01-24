@@ -23,7 +23,7 @@ export async function getServiceWidgets(c: Context) {
       .where(
         and(
           eq(serviceWidgets.serviceId, serviceId),
-          eq(serviceWidgets.isVisible, true),
+          eq(serviceWidgets.isVisible, 1),
         ),
       )
       .orderBy(serviceWidgets.order);
@@ -44,7 +44,7 @@ export async function getBulkServiceWidgets(c: Context) {
     const publicServices = await db
       .select({ id: services.id })
       .from(services)
-      .where(eq(services.public, true));
+      .where(eq(services.public, 1));
 
     const serviceIds = publicServices.map((s) => s.id);
 
@@ -56,7 +56,7 @@ export async function getBulkServiceWidgets(c: Context) {
     const allWidgets = await db
       .select()
       .from(serviceWidgets)
-      .where(eq(serviceWidgets.isVisible, true))
+      .where(eq(serviceWidgets.isVisible, 1))
       .orderBy(serviceWidgets.order);
 
     // Group widgets by serviceId

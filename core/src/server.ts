@@ -36,16 +36,10 @@ app.get("/health", (c) => c.text("OK"));
 // Auth routes
 app.post("/api/auth/register/password", authHandlers.registerPassword);
 app.post("/api/auth/login/password", authHandlers.loginPassword);
-app.get(
-  "/api/auth/register/webauthn/start",
-  authHandlers.startWebAuthnRegistration,
-);
-app.post(
-  "/api/auth/register/webauthn/finish",
-  authHandlers.finishWebAuthnRegistration,
-);
-app.get("/api/auth/login/webauthn/start", authHandlers.startWebAuthnLogin);
-app.post("/api/auth/login/webauthn/finish", authHandlers.finishWebAuthnLogin);
+app.get("/api/auth/register/begin", authHandlers.startWebAuthnRegistration);
+app.post("/api/auth/register/finish", authHandlers.finishWebAuthnRegistration);
+app.get("/api/auth/login/begin", authHandlers.startWebAuthnLogin);
+app.post("/api/auth/login/finish", authHandlers.finishWebAuthnLogin);
 
 // Service routes
 app.get("/api/services", serviceHandlers.getServices);
