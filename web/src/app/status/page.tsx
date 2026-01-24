@@ -25,13 +25,18 @@ export default function StatusPageRoute() {
     setMounted(true);
     const savedUser = localStorage.getItem("nexus_user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      if (parsedUser.id) {
+        localStorage.setItem("userId", parsedUser.id);
+      }
     }
   }, []);
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("nexus_user");
+    localStorage.removeItem("userId");
   };
 
   if (!mounted) {

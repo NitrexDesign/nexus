@@ -35,12 +35,16 @@ export default function AuthPage() {
   const handleLogin = (u: User) => {
     setUser(u);
     localStorage.setItem("nexus_user", JSON.stringify(u));
+    if (u.id) {
+      localStorage.setItem("userId", u.id);
+    }
     router.push("/admin");
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("nexus_user");
+    localStorage.removeItem("userId");
   };
 
   if (!mounted) {

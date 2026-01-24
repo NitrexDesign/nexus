@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AuthProps {
-  onLogin: (user: { username: string }) => void;
+  onLogin: (user: { username: string; userId?: string; id?: string }) => void;
 }
 
 export function Auth({ onLogin }: AuthProps) {
@@ -76,12 +76,12 @@ export function Auth({ onLogin }: AuthProps) {
       return result;
     },
     onSuccess: (result) => {
-      // Store userId in localStorage for admin operations
-      if (result.userId) {
-        localStorage.setItem("userId", result.userId);
-      }
       toast.success("Access granted. Welcome back.");
-      onLogin({ username: result.username });
+      onLogin({ 
+        username: result.username, 
+        userId: result.userId,
+        id: result.userId // Ensure both id and userId are set for compatibility
+      });
       queryClient.invalidateQueries(); // Refresh everything after login
     },
     onError: (err) =>

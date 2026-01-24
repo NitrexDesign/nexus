@@ -30,19 +30,28 @@ export default function AdminPage() {
     setMounted(true);
     const savedUser = localStorage.getItem("nexus_user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      if (parsedUser.id) {
+        localStorage.setItem("userId", parsedUser.id);
+      }
     }
   }, []);
 
   const handleLogin = (u: User) => {
     setUser(u);
     localStorage.setItem("nexus_user", JSON.stringify(u));
+    if (u.id) {
+      localStorage.setItem("userId", u.id);
+    }
     router.push("/admin");
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("nexus_user");
+    localStorage.removeItem("userId");
+    router.push("/");
   };
 
   if (!mounted) {
