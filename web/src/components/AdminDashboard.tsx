@@ -627,7 +627,7 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                   )}
                 </TabsContent>
               </motion.div>
-            ) : (
+            ) : activeTab === "users" ? (
               <motion.div
                 key="users"
                 initial={{ opacity: 0, x: 20 }}
