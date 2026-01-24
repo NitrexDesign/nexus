@@ -51,7 +51,10 @@ export async function getProfile(c: Context) {
       .where(eq(credentials.userId, userId));
 
     return c.json({
-      ...user,
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      approved: user.approved,
       hasPassword: !!user.hasPassword,
       passkeys: userCreds.map((cred) => ({
         id: cred.id.toString("base64url"),

@@ -77,10 +77,10 @@ export function Auth({ onLogin }: AuthProps) {
     },
     onSuccess: (result) => {
       toast.success("Access granted. Welcome back.");
-      onLogin({ 
-        username: result.username, 
+      onLogin({
+        username: result.username,
         userId: result.userId,
-        id: result.userId // Ensure both id and userId are set for compatibility
+        id: result.userId, // Ensure both id and userId are set for compatibility
       });
       queryClient.invalidateQueries(); // Refresh everything after login
     },
