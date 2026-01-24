@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Server, Edit2, MoreVertical, Trash2 } from "lucide-react";
+import { Server, Edit2, MoreVertical, Trash2, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { resolveUrl } from "@/lib/api-client";
@@ -21,6 +21,8 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { ServiceWidgetDialog } from "./ServiceWidgetDialog";
+import { useState } from "react";
 
 interface Service {
   id: string;
@@ -54,7 +56,10 @@ export function ServiceCard({
   onEdit,
   onDelete,
 }: ServiceCardProps) {
+  const [widgetDialogOpen, setWidgetDialogOpen] = useState(false);
+  
   return (
+    <>
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.98 }}
@@ -176,6 +181,14 @@ export function ServiceCard({
                   onClick={onEdit}
                 >
                   <Edit2 size={14} className="mr-2" /> Edit
+                </Button>
+                <Button
+                  className="flex-1 rounded-lg"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setWidgetDialogOpen(true)}
+                >
+                  <LayoutGrid size={14} className="mr-2" /> Widgets
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -321,5 +334,13 @@ export function ServiceCard({
         </CardContent>
       </Card>
     </motion.div>
+    
+    <ServiceWidgetDialog
+      serviceId={s.id}
+      serviceName={s.name}
+      open={widgetDialogOpen}
+      onOpenChange={setWidgetDialogOpen}
+    />
+    </>
   );
 }

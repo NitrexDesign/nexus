@@ -23,6 +23,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import {
+  ServiceWidget,
+  ServiceWidgetRenderer,
+} from "@/components/service-widgets";
 
 interface Service {
   id: string;
@@ -83,6 +87,21 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
         }) || []
       );
     },
+  });
+
+  // Fetch all widgets for public services (bulk endpoint for efficiency)
+  const { data: widgetsMap = {} } = useQuery<Record<string, ServiceWidget[]>>({
+    queryKey: ["serviceWidgets", "bulk"],
+    queryFn: async () => {
+      if (services.length === 0) return {};
+      const serviceIds = services.map((s) => s.id);
+      const res = await apiFetch(
+        `/api/services/widgets/bulk?serviceIds=${serviceIds.join(",")}`,
+      );
+      if (!res.ok) return {};
+      return res.json();
+    },
+    enabled: services.length > 0,
   });
 
   useEffect(() => {
@@ -317,6 +336,25 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                         </div>
                       </div>
                     </CardContent>
+                    
+                    {/* Widgets Section */}
+                    {widgetsMap[s.id] && widgetsMap[s.id].length > 0 && (
+                      <div
+                        className="border-t px-5 py-4 space-y-2 bg-muted/10"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        {widgetsMap[s.id].map((widget, idx) => (
+                          <ServiceWidgetRenderer
+                            key={widget.id}
+                            widget={widget}
+                            index={idx}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </Card>
                 </motion.div>
               ))}
@@ -472,6 +510,25 @@ export function PublicDashboard({ search }: PublicDashboardProps) {
                               </div>
                             </div>
                           </CardContent>
+                          
+                          {/* Widgets Section */}
+                          {widgetsMap[s.id] && widgetsMap[s.id].length > 0 && (
+                            <div
+                              className="border-t px-5 py-4 space-y-2 bg-muted/10"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            >
+                              {widgetsMap[s.id].map((widget, idx) => (
+                                <ServiceWidgetRenderer
+                                  key={widget.id}
+                                  widget={widget}
+                                  index={idx}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </Card>
                       </motion.div>
                     ))}

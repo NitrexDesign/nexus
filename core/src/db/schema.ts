@@ -75,6 +75,22 @@ export const embedConfigs = mysqlTable("embed_configs", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Service widgets table - customizable info cards for services
+export const serviceWidgets = mysqlTable("service_widgets", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  serviceId: varchar("service_id", { length: 255 })
+    .notNull()
+    .references(() => services.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 50 }).notNull(), // 'metric', 'chart', 'info', 'link', 'status'
+  title: varchar("title", { length: 255 }).notNull(),
+  content: json("content").$type<Record<string, any>>().notNull(), // Flexible content storage
+  settings: json("settings").$type<Record<string, any>>().default({}).notNull(),
+  order: int("order").default(0).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Widgets removed - tables dropped via migration
 // If you need the schema, refer to previous migration files for the original definitions.
 
@@ -95,5 +111,16 @@ export const embedConfigsRelations = relations(embedConfigs, ({ one }) => ({
   user: one(users, {
     fields: [embedConfigs.userId],
     references: [users.id],
+  }),
+}));
+
+export const servicesRelations = relations(services, ({ many }) => ({
+  widgets: many(serviceWidgets),
+}));
+
+export const serviceWidgetsRelations = relations(serviceWidgets, ({ one }) => ({
+  service: one(services, {
+    fields: [serviceWidgets.serviceId],
+    references: [services.id],
   }),
 }));

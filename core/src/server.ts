@@ -14,6 +14,7 @@ import * as serviceHandlers from "./api/services";
 import * as iconHandlers from "./api/icons";
 import * as userHandlers from "./api/users";
 import * as embedHandlers from "./api/embeds";
+import * as serviceWidgetHandlers from "./api/service-widgets";
 import { validateEmbedApiKey, requireAdmin } from "./auth/api-keys";
 // Widgets API removed
 
@@ -56,6 +57,16 @@ app.post("/api/services/bulk", serviceHandlers.importServices); // Alias for imp
 app.get("/api/services/groups", serviceHandlers.getServiceGroups);
 app.get("/api/services/:id/uptime", serviceHandlers.getServiceUptime);
 app.get("/api/services/uptime", serviceHandlers.getAllServicesUptime);
+
+// Service widgets routes - Public
+app.get("/api/services/:serviceId/widgets", serviceWidgetHandlers.getServiceWidgets);
+app.get("/api/services/widgets/bulk", serviceWidgetHandlers.getBulkServiceWidgets);
+
+// Service widgets routes - Admin (requires auth)
+app.get("/api/services/widgets/admin/:serviceId", requireAdmin, serviceWidgetHandlers.getAdminServiceWidgets);
+app.post("/api/services/:serviceId/widgets", requireAdmin, serviceWidgetHandlers.createServiceWidget);
+app.put("/api/services/widgets/:id", requireAdmin, serviceWidgetHandlers.updateServiceWidget);
+app.delete("/api/services/widgets/:id", requireAdmin, serviceWidgetHandlers.deleteServiceWidget);
 
 // Icon routes
 app.get("/api/icons/search", iconHandlers.searchIcons);
