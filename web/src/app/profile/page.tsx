@@ -51,7 +51,7 @@ export default function Profile() {
         onSearchChange={setSearch}
         onLogout={handleLogout}
       />
-      <FloatingNav user={user} onLogout={handleLogout} />
+      <FloatingNav />
       <div className="container mx-auto px-4 pt-20">
         <ProfilePage />
       </div>
