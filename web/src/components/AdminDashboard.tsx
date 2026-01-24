@@ -51,6 +51,7 @@ import { ServiceCard } from "./admin/ServiceCard";
 import { StatsCards } from "./admin/StatsCards";
 import { UserManagement } from "./admin/UserManagement";
 import { ServiceDialog } from "./admin/ServiceDialog";
+import { EmbedManagement } from "./admin/EmbedManagement";
 
 interface Service {
   id: string;
@@ -318,9 +319,12 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-[240px] grid-cols-2 bg-transparent">
+              <TabsList className="grid w-[360px] grid-cols-3 bg-transparent">
                 <TabsTrigger value="services" className="rounded-lg">
                   Services
+                </TabsTrigger>
+                <TabsTrigger value="embeds" className="rounded-lg">
+                  Embeds
                 </TabsTrigger>
                 <TabsTrigger value="users" className="rounded-lg">
                   Users
@@ -649,7 +653,19 @@ export function AdminDashboard({ search }: AdminDashboardProps) {
                   </div>
                 </TabsContent>
               </motion.div>
-            )}
+            ) : activeTab === "embeds" ? (
+              <motion.div
+                key="embeds"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <TabsContent value="embeds" className="outline-none mt-0">
+                  <EmbedManagement />
+                </TabsContent>
+              </motion.div>
+            ) : null}
           </AnimatePresence>
         </Tabs>
       </div>

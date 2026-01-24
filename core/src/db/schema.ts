@@ -53,17 +53,47 @@ export const services = mysqlTable("services", {
   lastChecked: timestamp("last_checked"),
 });
 
+// Embed configurations table
+export const embedConfigs = mysqlTable("embed_configs", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'status', 'uptime', 'metrics', etc.
+  apiKey: varchar("api_key", { length: 255 }).notNull().unique(),
+  apiKeyHash: varchar("api_key_hash", { length: 255 }).notNull(),
+  allowedOrigins: json("allowed_origins")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
+  dataEndpoint: varchar("data_endpoint", { length: 255 }), // Custom endpoint or null for default
+  refreshInterval: int("refresh_interval").default(60).notNull(), // seconds
+  settings: json("settings").$type<Record<string, any>>().default({}).notNull(),
+  isPublic: boolean("is_public").default(true).notNull(),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Widgets removed - tables dropped via migration
 // If you need the schema, refer to previous migration files for the original definitions.
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   credentials: many(credentials),
+  embedConfigs: many(embedConfigs),
 }));
 
 export const credentialsRelations = relations(credentials, ({ one }) => ({
   user: one(users, {
     fields: [credentials.userId],
+    references: [users.id],
+  }),
+}));
+
+export const embedConfigsRelations = relations(embedConfigs, ({ one }) => ({
+  user: one(users, {
+    fields: [embedConfigs.userId],
     references: [users.id],
   }),
 }));
