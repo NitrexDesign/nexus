@@ -37,16 +37,27 @@ export function Auth({ onLogin }: AuthProps) {
       let result;
       if (password) {
         result = await api.registerWithPassword(username, password);
-        return { message: "Account created! You can now authenticate.", result };
+        return {
+          message: "Account created! You can now authenticate.",
+          result,
+        };
       } else {
         const options = await api.beginRegistration(username);
-        const attestationResponse = await startRegistration({ optionsJSON: options });
+        const attestationResponse = await startRegistration({
+          optionsJSON: options,
+        });
         result = await api.finishRegistration(username, attestationResponse);
-        return { message: "Identity profile initialized! You can now authenticate.", result };
+        return {
+          message: "Identity profile initialized! You can now authenticate.",
+          result,
+        };
       }
     },
     onSuccess: (data) => toast.success(data.message),
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to initialize account"),
+    onError: (err) =>
+      toast.error(
+        err instanceof Error ? err.message : "Failed to initialize account",
+      ),
   });
 
   const loginMutation = useMutation({
@@ -57,7 +68,9 @@ export function Auth({ onLogin }: AuthProps) {
         result = await api.loginWithPassword(username, password);
       } else {
         const options = await api.beginLogin(username);
-        const assertionResponse = await startAuthentication({ optionsJSON: options });
+        const assertionResponse = await startAuthentication({
+          optionsJSON: options,
+        });
         result = await api.finishLogin(username, assertionResponse);
       }
       return result;
@@ -71,7 +84,12 @@ export function Auth({ onLogin }: AuthProps) {
       onLogin({ username: result.username });
       queryClient.invalidateQueries(); // Refresh everything after login
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Authentication verification failed"),
+    onError: (err) =>
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Authentication verification failed",
+      ),
   });
 
   const loading = registerMutation.isPending || loginMutation.isPending;
@@ -96,7 +114,9 @@ export function Auth({ onLogin }: AuthProps) {
               <div className="mx-auto bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
                 <Server className="text-primary h-6 w-6" />
               </div>
-              <CardTitle className="text-3xl font-black tracking-tight">Welcome</CardTitle>
+              <CardTitle className="text-3xl font-black tracking-tight">
+                Welcome
+              </CardTitle>
               <CardDescription className="text-base">
                 Your secure portal to the digital ether.
               </CardDescription>
@@ -108,13 +128,25 @@ export function Auth({ onLogin }: AuthProps) {
                 className="space-y-6"
               >
                 <TabsList className="grid w-full grid-cols-2 rounded-xl p-1 bg-muted/50">
-                  <TabsTrigger value="login" className="rounded-lg font-bold">Login</TabsTrigger>
-                  <TabsTrigger value="register" className="rounded-lg font-bold">Register</TabsTrigger>
+                  <TabsTrigger value="login" className="rounded-lg font-bold">
+                    Login
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="register"
+                    className="rounded-lg font-bold"
+                  >
+                    Register
+                  </TabsTrigger>
                 </TabsList>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="text-sm font-bold ml-1">Username</Label>
+                    <Label
+                      htmlFor="username"
+                      className="text-sm font-bold ml-1"
+                    >
+                      Username
+                    </Label>
                     <Input
                       id="username"
                       placeholder="e.g. kieran"
@@ -125,7 +157,12 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-bold ml-1">Password (Optional)</Label>
+                    <Label
+                      htmlFor="password"
+                      className="text-sm font-bold ml-1"
+                    >
+                      Password (Optional)
+                    </Label>
                     <Input
                       id="password"
                       type="password"
@@ -152,8 +189,10 @@ export function Auth({ onLogin }: AuthProps) {
                         >
                           {loading ? (
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          ) : password ? (
+                            "Login with Password"
                           ) : (
-                            password ? "Login with Password" : "Authenticate with Passkey"
+                            "Authenticate with Passkey"
                           )}
                         </Button>
                       </motion.div>
@@ -173,8 +212,10 @@ export function Auth({ onLogin }: AuthProps) {
                         >
                           {loading ? (
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          ) : password ? (
+                            "Register with Password"
                           ) : (
-                            password ? "Register with Password" : "Initialize Identity Profile"
+                            "Initialize Identity Profile"
                           )}
                         </Button>
                       </motion.div>

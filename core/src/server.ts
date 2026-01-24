@@ -9,7 +9,9 @@ import { connectClickHouse, closeClickHouse } from "./db/clickhouse";
 import { startHealthChecker, stopHealthChecker } from "./health/checker";
 import { initWebAuthn } from "./auth/webauthn";
 import { initAuthHandlers } from "./auth/handlers";
+import { initProfileHandlers } from "./api/profile";
 import * as authHandlers from "./auth/handlers";
+import * as profileHandlers from "./api/profile";
 import * as serviceHandlers from "./api/services";
 import * as iconHandlers from "./api/icons";
 import * as userHandlers from "./api/users";
@@ -40,6 +42,13 @@ app.get("/api/auth/register/begin", authHandlers.startWebAuthnRegistration);
 app.post("/api/auth/register/finish", authHandlers.finishWebAuthnRegistration);
 app.get("/api/auth/login/begin", authHandlers.startWebAuthnLogin);
 app.post("/api/auth/login/finish", authHandlers.finishWebAuthnLogin);
+
+// Profile routes (requires auth)
+app.get("/api/profile", profileHandlers.getProfile);
+app.post("/api/profile/password", profileHandlers.updatePassword);
+app.post("/api/profile/passkey/begin", profileHandlers.beginAddPasskey);
+app.post("/api/profile/passkey/finish", profileHandlers.finishAddPasskey);
+app.delete("/api/profile/passkey/:id", profileHandlers.deletePasskey);
 
 // Service routes
 app.get("/api/services", serviceHandlers.getServices);
@@ -186,8 +195,7 @@ async function startServer() {
       rpID: config.webauthn.rpID,
       origin: config.webauthn.origin,
     });
-    initAuthHandlers(webauthnConfig);
-
+    initAuthHandlers(webauthnConfig);    initProfileHandlers(webauthnConfig);
     // Start health checker
     console.log("[Server] Starting health checker...");
     startHealthChecker(config.healthCheckInterval);
