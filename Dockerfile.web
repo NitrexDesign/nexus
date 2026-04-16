@@ -24,8 +24,13 @@ COPY web/ .
 
 RUN pnpm run build
 
-# Install production-only dependencies in a clean layer
-RUN rm -rf node_modules && pnpm i --frozen-lockfile --prod
+# Install production-only dependencies and remove heavy build-time transitive deps
+# that vinext drags in but doesn't need for `vinext start`
+RUN rm -rf node_modules && pnpm i --frozen-lockfile --prod && \
+	cd node_modules/.pnpm && \
+	rm -rf next@* @next+swc* typescript@* @img+sharp* \
+	sharp@* caniuse-lite@* webpack@* \
+	babel-plugin-react-compiler@* @babel* @vercel+og@*
 
 # Production image
 FROM base AS runner
