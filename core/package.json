@@ -16,8 +16,6 @@
 	"dependencies": {
 		"@clickhouse/client": "^1.16.0",
 		"@sentry/bun": "^10.49.0",
-		"@sentry/node": "^10.49.0",
-		"@sentry/profiling-node": "^10.49.0",
 		"@simplewebauthn/server": "^13.2.2",
 		"bcryptjs": "^3.0.3",
 		"dotenv": "^17.2.3",
