@@ -24,22 +24,21 @@ COPY web/ .
 
 RUN pnpm run build
 
-# Debug: list the standalone directory
-RUN ls -la /app/.next/standalone/ || true
-RUN find /app/.next/standalone -type d -maxdepth 3 || true
-
-# Production image, copy all the files and run next
+# Production image, copy all the files and run vinext
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy standalone build
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy build output, dependencies, and package files
+COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 # Copy public directory for static assets (embed.js, etc.)
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
@@ -50,4 +49,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-CMD ["node", "server.js"]
+CMD ["npx", "vinext", "start"]

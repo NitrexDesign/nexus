@@ -37,5 +37,6 @@ Thumbs.db
 .env.local
 .env.*.local
 .next/
+.vinext/
 # Sentry Config File
 .env.sentry-build-plugin
