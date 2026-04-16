@@ -43,7 +43,8 @@
     "react-window": "^2.2.7",
     "shadcn-ui": "^0.9.5",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "vinext": "^0.0.41"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
@@ -57,7 +58,6 @@
     "tailwindcss": "^4.2.2",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "~6.0.2",
-    "vinext": "^0.0.41",
     "vite": "^8.0.8"
   }
 }
