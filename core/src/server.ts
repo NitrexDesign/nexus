@@ -1,7 +1,10 @@
+import "./instrument";
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serveStatic } from "hono/bun";
+import * as Sentry from "@sentry/bun";
 import * as path from "path";
 import { config } from "./config";
 import { connectMySQL, closeMySQL } from "./db/mysql";
@@ -20,6 +23,15 @@ import { requireAdmin } from "./auth/api-keys";
 // Widgets API removed
 
 const app = new Hono();
+
+// Sentry error handler
+app.onError((err, c) => {
+  Sentry.captureException(err);
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+  return c.json({ error: "Internal server error" }, 500);
+});
 
 // Middleware
 app.use("*", logger());

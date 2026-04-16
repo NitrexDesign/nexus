@@ -14,14 +14,17 @@
 		"lint:fix": "eslint src/**/*.ts --fix"
 	},
 	"dependencies": {
-		"hono": "^4.11.5",
-		"drizzle-orm": "^0.45.1",
-		"mysql2": "^3.16.1",
 		"@clickhouse/client": "^1.16.0",
+		"@sentry/bun": "^10.49.0",
+		"@sentry/node": "^10.49.0",
+		"@sentry/profiling-node": "^10.49.0",
 		"@simplewebauthn/server": "^13.2.2",
 		"bcryptjs": "^3.0.3",
-		"uuid": "^13.0.0",
-		"dotenv": "^17.2.3"
+		"dotenv": "^17.2.3",
+		"drizzle-orm": "^0.45.1",
+		"hono": "^4.11.5",
+		"mysql2": "^3.16.1",
+		"uuid": "^13.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.2",
