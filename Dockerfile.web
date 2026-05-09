@@ -6,10 +6,10 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
 # Install dependencies
-COPY web/package.json web/pnpm-lock.yaml* ./
+COPY web/package.json web/pnpm-lock.yaml* web/pnpm-workspace.yaml* ./
 RUN if [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; else pnpm i; fi
 
 # Rebuild the source code only when needed
@@ -17,7 +17,7 @@ FROM base AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY web/ .
